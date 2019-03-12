@@ -110,8 +110,8 @@ void checkSensor(){
     if(S131!=0) {Cell.println(F("Sensor MQ131: OK!")); delay(300);}
     if(S135!=0) {Cell.println(F("Sensor MQ135: OK!")); delay(300);} 
   }
+  Cell.println(""); Cell.println("");
   delay(500);
-  loop();
 }
       
       
