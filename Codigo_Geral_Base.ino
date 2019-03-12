@@ -48,6 +48,16 @@ void setup(){
   TempHum.begin();
   Cell.begin(9600);
   Marker=0;
+  pinMode(MQ_02, INPUT);
+  pinMode(MQ_03, INPUT);
+  pinMode(MQ_04, INPUT);
+  pinMode(MQ_05, INPUT);
+  pinMode(MQ_06, INPUT);
+  pinMode(MQ_07, INPUT);
+  pinMode(MQ_08, INPUT);
+  pinMode(MQ_09, INPUT);
+  pinMode(MQ_131, INPUT);
+  pinMode(MQ_135, INPUT);
 
 void loop(){
   Cell.println(F(""));
