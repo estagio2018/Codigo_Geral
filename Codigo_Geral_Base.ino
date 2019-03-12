@@ -39,6 +39,7 @@
   #define MQ_09 A8
   #define MQ_131 A9
   #define MQ_135 A10
+  int S1, S2, S3, S4, S5, S6, S7, S8, S9, S131, S135;
   
 // Configuração do Hc05:
   SoftwareSerial Cell(2,3);
@@ -50,7 +51,9 @@ void setup(){
   Marker=0;
   pinMode(MQ_02, INPUT); pinMode(MQ_03, INPUT); pinMode(MQ_04, INPUT); pinMode(MQ_05, INPUT); pinMode(MQ_06, INPUT);
   pinMode(MQ_07, INPUT); pinMode(MQ_08, INPUT); pinMode(MQ_09, INPUT); pinMode(MQ_131, INPUT); pinMode(MQ_135, INPUT);
-  
+  S2 = analogRead(MQ_02); S3 = analogRead(MQ_03); S4 = analogRead(MQ_04); S5 = analogRead(MQ_05); S6 = analogRead(MQ_06);
+  S7 = analogRead(MQ_07); S8 = analogRead(MQ_08); S9 = analogRead(MQ_09); S131 = analogRead(MQ_131); S135 = analogRead(MQ_135);
+  checkSensor(); // Checa se os sensores estão ligados.
 }
 
 void loop(){
@@ -93,6 +96,25 @@ void loop(){
       
 }
 
+void checkSensor(){
+  Cell.println("Digite qualquer coisa.");
+  if(Cell.available()){
+    if(S2!=0) {Cell.Write("Sensor MQ02: OK!"); delay(300);}
+    if(S3!=0) {Cell.Write("Sensor MQ03: OK!"); delay(300);}
+    if(S4!=0) {Cell.Write("Sensor MQ04: OK!"); delay(300);}
+    if(S5!=0) {Cell.Write("Sensor MQ05: OK!"); delay(300);}
+    if(S6!=0) {Cell.Write("Sensor MQ06: OK!"); delay(300);}
+    if(S7!=0) {Cell.Write("Sensor MQ07: OK!"); delay(300);}
+    if(S8!=0) {Cell.Write("Sensor MQ08: OK!"); delay(300);}
+    if(S9!=0) {Cell.Write("Sensor MQ09: OK!"); delay(300);}
+    if(S131!=0) {Cell.Write("Sensor MQ131: OK!"); delay(300);}
+    if(S135!=0) {Cell.Write("Sensor MQ135: OK!"); delay(300);} 
+  }
+  delay(500);
+  loop();
+}
+      
+      
 void reading(){
   float Humidity = TempHum.readHumidity();
   float Temperature = TempHum.readTemperature();
@@ -101,8 +123,8 @@ void reading(){
   delay(Time*1000);
   Marker = 1;
 }
-  
-  
+
+
   
   
   
