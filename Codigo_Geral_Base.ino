@@ -5,16 +5,16 @@
     - Módulo Bluetooth Hc-05:
       + Rx necessita de divisor de tensão (5V~3,3V).
     -Sensores de Gás:
-      + MQ02;
-      + MQ03;
-      + MQ04;
-      + MQ05;
-      + MQ06;
-      + MQ07;
-      + MQ08;
-      + MQ09;
-      + MQ131;
-      + MQ135;
+      + MQ02 - Detecção de ;
+      + MQ03 - Detecção de ;
+      + MQ04 - Detecção de ;
+      + MQ05 - Detecção de ;
+      + MQ06 - Detecção de ;
+      + MQ07 - Detecção de ;
+      + MQ08 - Detecção de ;
+      + MQ09 - Detecção de ;
+      + MQ131 - Detecção de ;
+      + MQ135 - Detecção de ;
     -Sensor de Temperatura e Umidade DHT22.
 */
     
