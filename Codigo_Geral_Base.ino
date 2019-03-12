@@ -87,28 +87,28 @@ void loop(){
     case 7: Time = 300; reading(); break;
     case 8: Time = 600; reading(); break;
     case 9: setup(); break;
-    default: Cell.println("");
-             Cell.println("Desculpe, essa opção não");
-             Cell.println("está disponível.");
-             Cell.println(""); 
-             Cell.println("Por favor digite uma das opções a seguir:"); break;
+    default: Cell.println(F(""));
+             Cell.println(F("Desculpe, essa opção não"));
+             Cell.println(F("está disponível."));
+             Cell.println(F("")); 
+             Cell.println(F("Por favor digite uma das opções a seguir:")); break;
     }
       
 }
 
 void checkSensor(){
-  Cell.println("Digite qualquer coisa.");
+  Cell.println(F("Digite qualquer coisa."));
   if(Cell.available()){
-    if(S2!=0) {Cell.Write("Sensor MQ02: OK!"); delay(300);}
-    if(S3!=0) {Cell.Write("Sensor MQ03: OK!"); delay(300);}
-    if(S4!=0) {Cell.Write("Sensor MQ04: OK!"); delay(300);}
-    if(S5!=0) {Cell.Write("Sensor MQ05: OK!"); delay(300);}
-    if(S6!=0) {Cell.Write("Sensor MQ06: OK!"); delay(300);}
-    if(S7!=0) {Cell.Write("Sensor MQ07: OK!"); delay(300);}
-    if(S8!=0) {Cell.Write("Sensor MQ08: OK!"); delay(300);}
-    if(S9!=0) {Cell.Write("Sensor MQ09: OK!"); delay(300);}
-    if(S131!=0) {Cell.Write("Sensor MQ131: OK!"); delay(300);}
-    if(S135!=0) {Cell.Write("Sensor MQ135: OK!"); delay(300);} 
+    if(S2!=0) {Cell.println(F("Sensor MQ02: OK!")); delay(300);}
+    if(S3!=0) {Cell.println(F("Sensor MQ03: OK!")); delay(300);}
+    if(S4!=0) {Cell.println(F("Sensor MQ04: OK!")); delay(300);}
+    if(S5!=0) {Cell.println(F("Sensor MQ05: OK!")); delay(300);}
+    if(S6!=0) {Cell.println(F("Sensor MQ06: OK!")); delay(300);}
+    if(S7!=0) {Cell.println(F("Sensor MQ07: OK!")); delay(300);}
+    if(S8!=0) {Cell.println(F("Sensor MQ08: OK!")); delay(300);}
+    if(S9!=0) {Cell.println(F("Sensor MQ09: OK!")); delay(300);}
+    if(S131!=0) {Cell.println(F("Sensor MQ131: OK!")); delay(300);}
+    if(S135!=0) {Cell.println(F("Sensor MQ135: OK!")); delay(300);} 
   }
   delay(500);
   loop();
@@ -118,8 +118,8 @@ void checkSensor(){
 void reading(){
   float Humidity = TempHum.readHumidity();
   float Temperature = TempHum.readTemperature();
-  Cell.print("Temperatura= "); Cell.print(Temperature); Cell.print("°C ");
-  Cell.print(" Umidade= "); Cell.print(Humidity); Cell.println("% ");
+  Cell.print(F("Temperatura= ")); Cell.print(Temperature); Cell.print(F("°C "));
+  Cell.print(F(" Umidade= ")); Cell.print(Humidity); Cell.println(F("% "));
   delay(Time*1000);
   Marker = 1;
 }
