@@ -26,7 +26,7 @@
 // Configuração do DHT:
   #define DHT_Pin A0
   #define DHT_Type DHT22
-  DHT TempHum(DHT_Pin, DHT_Type)
+  DHT TempHum(DHT_Pin, DHT_Type);
   
 // Configuração dos sensores de gás:
   #define MQ_02 A1
