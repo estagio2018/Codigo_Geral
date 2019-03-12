@@ -46,8 +46,7 @@
   int Option, Time, Marker;
   
 void setup(){
-  TempHum.begin();
-  Cell.begin(9600);
+  TempHum.begin(); Cell.begin(9600);
   Marker=0;
   pinMode(MQ_02, INPUT); pinMode(MQ_03, INPUT); pinMode(MQ_04, INPUT); pinMode(MQ_05, INPUT); pinMode(MQ_06, INPUT);
   pinMode(MQ_07, INPUT); pinMode(MQ_08, INPUT); pinMode(MQ_09, INPUT); pinMode(MQ_131, INPUT); pinMode(MQ_135, INPUT);
@@ -72,9 +71,7 @@ void loop(){
   Cell.println(F("============================"));
   Cell.println(F(""));
   while(!Cell.available()){
-    if(Marker != 0){
-      reading();
-    }
+    if(Marker != 0) {reading();}
   }
   Option = Cell.read();
   switch(Option-48){
@@ -93,7 +90,6 @@ void loop(){
              Cell.println(F("")); 
              Cell.println(F("Por favor digite uma das opções a seguir:")); break;
     }
-      
 }
 
 void checkSensor(){
@@ -120,8 +116,7 @@ void reading(){
   float Temperature = TempHum.readTemperature();
   Cell.print(F("Temperatura= ")); Cell.print(Temperature); Cell.print(F("°C "));
   Cell.print(F(" Umidade= ")); Cell.print(Humidity); Cell.println(F("% "));
-  delay(Time*1000);
-  Marker = 1;
+  delay(Time*1000); Marker = 1;
 }
 
 
