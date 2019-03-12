@@ -24,9 +24,9 @@
   #include <DHT.h>
 
 // Configuração do DHT:
-  # Define DHT_Pin A0
-  # Define DHT_Type DHT22
-  # DHT TempHum(DHT_Pin, DHT_Type)
+  #define DHT_Pin A0
+  #define DHT_Type DHT22
+  DHT TempHum(DHT_Pin, DHT_Type)
   
 // Configuração dos sensores de gás:
   #define MQ_02 A1
