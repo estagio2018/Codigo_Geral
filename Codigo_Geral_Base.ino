@@ -5,16 +5,16 @@
     - Módulo Bluetooth Hc-05:
       + Rx necessita de divisor de tensão (5V~3,3V).
     -Sensores de Gás:
-      + MQ02 - Detecção de ;
-      + MQ03 - Detecção de ;
-      + MQ04 - Detecção de ;
-      + MQ05 - Detecção de ;
-      + MQ06 - Detecção de ;
-      + MQ07 - Detecção de ;
-      + MQ08 - Detecção de ;
-      + MQ09 - Detecção de ;
-      + MQ131 - Detecção de ;
-      + MQ135 - Detecção de ;
+      + MQ02 - Detecção de (...);
+      + MQ03 - Detecção de (...);
+      + MQ04 - Detecção de (...);
+      + MQ05 - Detecção de (...);
+      + MQ06 - Detecção de (...);
+      + MQ07 - Detecção de (...);
+      + MQ08 - Detecção de (...);
+      + MQ09 - Detecção de (...);
+      + MQ131 - Detecção de (...);
+      + MQ135 - Detecção de (...);
     -Sensor de Temperatura e Umidade DHT22.
 */
     
@@ -22,6 +22,8 @@
   //Bibliotecas:
   #include <SoftwareSerial.h>
   #include <DHT.h>
+  #include <Wire.h>
+  #include <RTClib.h>
 
 // Configuração do DHT:
   #define DHT_Pin A0
@@ -43,16 +45,25 @@
   
 // Configuração do Hc05:
   SoftwareSerial Cell(2,3);
-  int Option, Time, Marker;
+  int Option, Marker;
+  int Time = 1;
+
+// Configuração do RTC:
+  RTC_DS1307 Clk;
   
 void setup(){
-  TempHum.begin(); Cell.begin(9600);
-  Marker=0;
+  TempHum.begin(); Cell.begin(9600); Wire.begin (); Clk.begin ();
+  Marker = 0;
   pinMode(MQ_02, INPUT); pinMode(MQ_03, INPUT); pinMode(MQ_04, INPUT); pinMode(MQ_05, INPUT); pinMode(MQ_06, INPUT);
   pinMode(MQ_07, INPUT); pinMode(MQ_08, INPUT); pinMode(MQ_09, INPUT); pinMode(MQ_131, INPUT); pinMode(MQ_135, INPUT);
   S2 = analogRead(MQ_02); S3 = analogRead(MQ_03); S4 = analogRead(MQ_04); S5 = analogRead(MQ_05); S6 = analogRead(MQ_06);
   S7 = analogRead(MQ_07); S8 = analogRead(MQ_08); S9 = analogRead(MQ_09); S131 = analogRead(MQ_131); S135 = analogRead(MQ_135);
   checkSensor(); // Checa se os sensores estão ligados.
+  while(!Clk.isrunning()){
+    Clk.adjust(Datetime(__DATE__, __TIME__));
+    Cell.println("O relógio não está funcionando!");
+  }
+  getDate();
 }
 
 void loop(){
@@ -75,14 +86,14 @@ void loop(){
   }
   Option = Cell.read();
   switch(Option-48){
-    case 1: Time = 1; reading(); break;
-    case 2: Time = 2; reading(); break;
-    case 3: Time = 5; reading(); break;
-    case 4: Time = 10; reading(); break;
-    case 5: Time = 30; reading(); break;
-    case 6: Time = 60; reading(); break;
-    case 7: Time = 300; reading(); break;
-    case 8: Time = 600; reading(); break;
+    case 1: Time = 1; getTime(); reading(); break;
+    case 2: Time = 2; getTime(); reading(); break;
+    case 3: Time = 5; getTime(); reading(); break;
+    case 4: Time = 10; getTime(); reading(); break;
+    case 5: Time = 30; getTime(); reading(); break;
+    case 6: Time = 60; getTime(); reading(); break;
+    case 7: Time = 300; getTime(); reading(); break;
+    case 8: Time = 600; getTime(); reading(); break;
     case 9: setup(); break;
     default: Cell.println(F(""));
              Cell.println(F("Desculpe, essa opção não"));
@@ -119,8 +130,21 @@ void reading(){
   delay(Time*1000); Marker = 1;
 }
 
+void getDate(){
+  DateTime now = Clk.now();
+  Cell.print(now.day(), DEC); Cell.print("/");
+  Cell.print(now.month(), DEC); Cell.print("/");
+  Cell.print(now.year(), DEC); Cell.println();
+  delay(Time*1000);
+}
 
-  
+void getTime(){
+  DateTime now = Clk.now();
+  Cell.print(now.hour(), DEC); Cell.print(":");
+  Cell.print(now.minute(), DEC); Cell.print(":");
+  Cell.print(now.second(), DEC); Cell.println();
+  delay(Time*1000);
+}
   
   
   
