@@ -60,7 +60,7 @@ void setup(){
   S7 = analogRead(MQ_07); S8 = analogRead(MQ_08); S9 = analogRead(MQ_09); S131 = analogRead(MQ_131); S135 = analogRead(MQ_135);
   checkSensor(); // Checa se os sensores estão ligados.
   while(!Clk.isrunning()){
-    Clk.adjust(Datetime(__DATE__, __TIME__));
+    Clk.adjust(DateTime(__DATE__, __TIME__));
     Cell.println("O relógio não está funcionando!");
   }
   getDate();
