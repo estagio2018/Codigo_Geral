@@ -20,7 +20,7 @@
     
     
   //Bibliotecas:
-  #include <SoftwareSerial.h>
+  #include <SoftwareSerial.h> 
   #include <DHT.h>
   #include <Wire.h>
   #include <RTClib.h>
@@ -54,7 +54,7 @@
   RTC_DS1307 Clk;
 
 // Configuração do SD Card:
-  cont int SDpin = 4;
+  const int SDpin = 4;
   
 void setup(){
   TempHum.begin(); Cell.begin(9600); Wire.begin (); Clk.begin ();
@@ -63,12 +63,19 @@ void setup(){
   pinMode(MQ_07, INPUT); pinMode(MQ_08, INPUT); pinMode(MQ_09, INPUT); pinMode(MQ_131, INPUT); pinMode(MQ_135, INPUT);
   S2 = analogRead(MQ_02); S3 = analogRead(MQ_03); S4 = analogRead(MQ_04); S5 = analogRead(MQ_05); S6 = analogRead(MQ_06);
   S7 = analogRead(MQ_07); S8 = analogRead(MQ_08); S9 = analogRead(MQ_09); S131 = analogRead(MQ_131); S135 = analogRead(MQ_135);
-  checkSensor(); // Checa se os sensores estão ligados.
   while(!Clk.isrunning()){
     Clk.adjust(DateTime(__DATE__, __TIME__));
     Cell.println("O relógio não está funcionando!");
   }
-  getDate();
+  getDate(); // Obtem a data do RTC.
+  getTime(); // Obtem a hora do RTC.
+  checkSensor(); // Checa se os sensores estão ligados.
+  Cell.print("Procurando Cartão SD...");
+  if(!SD.begin(SDpin)){
+    Cell.println("Cartão SD não encontrado!!!");
+    while(true);
+  }
+  Cell.println("Cartão SD conectado.");
 }
 
 void loop(){
