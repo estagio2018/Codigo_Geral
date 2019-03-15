@@ -24,6 +24,8 @@
   #include <DHT.h>
   #include <Wire.h>
   #include <RTClib.h>
+  #include <SPI.h>
+  #include <SD.h>
 
 // Configuração do DHT:
   #define DHT_Pin A0
@@ -50,6 +52,9 @@
 
 // Configuração do RTC:
   RTC_DS1307 Clk;
+
+// Configuração do SD Card:
+  cont int SDpin = 4;
   
 void setup(){
   TempHum.begin(); Cell.begin(9600); Wire.begin (); Clk.begin ();
