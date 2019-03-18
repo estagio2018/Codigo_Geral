@@ -100,3 +100,5 @@ private:
 	uint8_t	_encode(uint8_t vaule);
 };
 #endif
+
+//https://github.com/filipeflop/DS1307/blob/master/DS1307.h
