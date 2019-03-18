@@ -23,7 +23,7 @@
 */
     
     
-  //Bibliotecas:
+//Bibliotecas:
   #include <SoftwareSerial.h> 
   #include <DHT.h>
   #include <Wire.h>
