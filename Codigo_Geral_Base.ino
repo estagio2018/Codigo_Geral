@@ -71,15 +71,17 @@ void setup(){
     Ck.adjust(DateTime(__DATE__, __TIME__));
     Cell.println("O relógio não está funcionando!");
   }
-  getDate(); // Obtem a data do RTC.
-  getTime(); // Obtem a hora do RTC.
-  checkSensor(); // Checa se os sensores estão ligados.
   Cell.print("Procurando Cartão SD...");
   if(!SD.begin(CS)){
     Cell.println("Cartão SD não encontrado!!!");
     while(true);
   }
   Cell.println("Cartão SD conectado.");
+  File dataFile = SD.open("relatório.txt", FILE_WRITE);
+  while(!dataFile){ Cell.println(F("Erro ao abrir arquivo de texto!"))}
+  getDate(); // Obtem a data do RTC.
+  getTime(); // Obtem a hora do RTC.
+  checkSensor(); // Checa se os sensores estão ligados.
 }
 
 void loop(){
@@ -110,31 +112,31 @@ void loop(){
     case 6: Time = 60; getTime(); reading(); break;
     case 7: Time = 300; getTime(); reading(); break;
     case 8: Time = 600; getTime(); reading(); break;
-    case 9: setup(); break;
-    default: Cell.println(F(""));
-             Cell.println(F("Desculpe, essa opção não"));
-             Cell.println(F("está disponível."));
-             Cell.println(F("")); 
-             Cell.println(F("Por favor digite uma das opções a seguir:")); break;
+    case 9: dataFile.println(F("Sistema reiniciado pelo usuário."));
+            dataFile.println(""); dataFile.println("");
+            dataFile.close(); setup(); break;
+    default: Cell.println(F("")); Cell.println(F("Desculpe, essa opção não"));
+             Cell.println(F("está disponível.")); Cell.println(F(""));
+             Cell.println(F("Por favor digite uma das opções a seguir:"));
+             dataFile.println(F("A opção digitada foi invalidada")); break;
     }
 }
 
 void checkSensor(){
   Cell.println(F("Digite qualquer coisa."));
   if(Cell.available()){
-    if(S2!=0) {Cell.println(F("Sensor MQ02: OK!")); delay(300);}
-    if(S3!=0) {Cell.println(F("Sensor MQ03: OK!")); delay(300);}
-    if(S4!=0) {Cell.println(F("Sensor MQ04: OK!")); delay(300);}
-    if(S5!=0) {Cell.println(F("Sensor MQ05: OK!")); delay(300);}
-    if(S6!=0) {Cell.println(F("Sensor MQ06: OK!")); delay(300);}
-    if(S7!=0) {Cell.println(F("Sensor MQ07: OK!")); delay(300);}
-    if(S8!=0) {Cell.println(F("Sensor MQ08: OK!")); delay(300);}
-    if(S9!=0) {Cell.println(F("Sensor MQ09: OK!")); delay(300);}
-    if(S131!=0) {Cell.println(F("Sensor MQ131: OK!")); delay(300);}
-    if(S135!=0) {Cell.println(F("Sensor MQ135: OK!")); delay(300);} 
+    if(S2!=0) {Cell.println(F("Sensor MQ02: OK!")); dataFile.println(F("Sensor MQ02: OK!")); delay(300);}
+    if(S3!=0) {Cell.println(F("Sensor MQ03: OK!")); dataFile.println(F("Sensor MQ03: OK!")); delay(300);}
+    if(S4!=0) {Cell.println(F("Sensor MQ04: OK!")); dataFile.println(F("Sensor MQ04: OK!")); delay(300);}
+    if(S5!=0) {Cell.println(F("Sensor MQ05: OK!")); dataFile.println(F("Sensor MQ05: OK!")); delay(300);}
+    if(S6!=0) {Cell.println(F("Sensor MQ06: OK!")); dataFile.println(F("Sensor MQ06: OK!")); delay(300);}
+    if(S7!=0) {Cell.println(F("Sensor MQ07: OK!")); dataFile.println(F("Sensor MQ07: OK!")); delay(300);}
+    if(S8!=0) {Cell.println(F("Sensor MQ08: OK!")); dataFile.println(F("Sensor MQ08: OK!")); delay(300);}
+    if(S9!=0) {Cell.println(F("Sensor MQ09: OK!")); datFile.println(F("Sensor MQ09: OK!")); delay(300);}
+    if(S131!=0) {Cell.println(F("Sensor MQ131: OK!")); dataFile.println(F("Sensor MQ131: OK!")); delay(300);}
+    if(S135!=0) {Cell.println(F("Sensor MQ135: OK!")); dataFile.println(F("Sensor MQ135: OK!")); delay(300);} 
   }
-  Cell.println(""); Cell.println("");
-  delay(500);
+  Cell.println(""); Cell.println("");dataFile.println(""); dataFile.println(""); delay(500);
 }
       
       
@@ -143,6 +145,8 @@ void reading(){
   float Temperature = TempHum.readTemperature();
   Cell.print(F("Temperatura= ")); Cell.print(Temperature); Cell.print(F("°C "));
   Cell.print(F(" Umidade= ")); Cell.print(Humidity); Cell.println(F("% "));
+  dataFile.print(F("Temperatura= ")); dataFile.print(Temperature); dataFile.print(F("°C "));
+  dataFile.print(F(" Umidade= ")); dataFile.print(Humidity); dataFile.println(F("% "));
   delay(Time*1000); Marker = 1;
 }
 
@@ -151,6 +155,9 @@ void getDate(){
   Cell.print(now.day(), DEC); Cell.print("/");
   Cell.print(now.month(), DEC); Cell.print("/");
   Cell.print(now.year(), DEC); Cell.println();
+  dataFile.print(now.day(), DEC); dataFile.print("/");
+  dataFile.print(now.month(), DEC); dataFile.print("/");
+  dataFile.print(now.year(), DEC); dataFile.println();
   delay(Time*1000);
 }
 
@@ -159,6 +166,9 @@ void getTime(){
   Cell.print(now.hour(), DEC); Cell.print(":");
   Cell.print(now.minute(), DEC); Cell.print(":");
   Cell.print(now.second(), DEC); Cell.println();
+  dataFile.print(now.hour(), DEC); dataFile.print(":");
+  dataFile.print(now.minute(), DEC); dataFile.print(":");
+  dataFile.print(now.second(), DEC); dataFile.println();
   delay(Time*1000);
 }
   
