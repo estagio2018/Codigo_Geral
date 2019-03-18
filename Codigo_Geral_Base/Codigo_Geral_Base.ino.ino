@@ -16,10 +16,13 @@
       + MQ131 - Detecção de (...);
       + MQ135 - Detecção de (...);
     -Sensor de Temperatura e Umidade DHT22.
-    - Módulo SD card:
+    -Tiny RTC: ***COMUNICAÇÃO I2C***
+      + SDA: pino 20;
+      + SCL: pino 21.
+    - Módulo SD card: ***COMUNICAÇÃO SPI***
       + MOSI: pino 50;
       + MISO: pino 51;
-      + SCK: pino 52;      
+      + SCK: pino 52.
 */
     
     
