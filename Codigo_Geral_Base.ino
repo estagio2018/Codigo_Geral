@@ -16,6 +16,10 @@
       + MQ131 - Detecção de (...);
       + MQ135 - Detecção de (...);
     -Sensor de Temperatura e Umidade DHT22.
+    - Módulo SD card:
+      + MOSI: pino 50;
+      + MISO: pino 51;
+      + SCK: pino 52;      
 */
     
     
@@ -51,27 +55,27 @@
   int Time = 1;
 
 // Configuração do RTC:
-  RTC_DS1307 Clk;
+  RTC_DS1307 Ck;
 
 // Configuração do SD Card:
-  const int SDpin = 4;
+  const int SS = 4;
   
 void setup(){
-  TempHum.begin(); Cell.begin(9600); Wire.begin (); Clk.begin ();
+  TempHum.begin(); Cell.begin(9600); Wire.begin (); Ck.begin ();
   Marker = 0;
   pinMode(MQ_02, INPUT); pinMode(MQ_03, INPUT); pinMode(MQ_04, INPUT); pinMode(MQ_05, INPUT); pinMode(MQ_06, INPUT);
   pinMode(MQ_07, INPUT); pinMode(MQ_08, INPUT); pinMode(MQ_09, INPUT); pinMode(MQ_131, INPUT); pinMode(MQ_135, INPUT);
   S2 = analogRead(MQ_02); S3 = analogRead(MQ_03); S4 = analogRead(MQ_04); S5 = analogRead(MQ_05); S6 = analogRead(MQ_06);
   S7 = analogRead(MQ_07); S8 = analogRead(MQ_08); S9 = analogRead(MQ_09); S131 = analogRead(MQ_131); S135 = analogRead(MQ_135);
-  while(!Clk.isrunning()){
-    Clk.adjust(DateTime(__DATE__, __TIME__));
+  while(!Ck.isrunning()){
+    Ck.adjust(DateTime(__DATE__, __TIME__));
     Cell.println("O relógio não está funcionando!");
   }
   getDate(); // Obtem a data do RTC.
   getTime(); // Obtem a hora do RTC.
   checkSensor(); // Checa se os sensores estão ligados.
   Cell.print("Procurando Cartão SD...");
-  if(!SD.begin(SDpin)){
+  if(!SD.begin(SS)){
     Cell.println("Cartão SD não encontrado!!!");
     while(true);
   }
@@ -143,7 +147,7 @@ void reading(){
 }
 
 void getDate(){
-  DateTime now = Clk.now();
+  DateTime now = Ck.now();
   Cell.print(now.day(), DEC); Cell.print("/");
   Cell.print(now.month(), DEC); Cell.print("/");
   Cell.print(now.year(), DEC); Cell.println();
@@ -151,7 +155,7 @@ void getDate(){
 }
 
 void getTime(){
-  DateTime now = Clk.now();
+  DateTime now = Ck.now();
   Cell.print(now.hour(), DEC); Cell.print(":");
   Cell.print(now.minute(), DEC); Cell.print(":");
   Cell.print(now.second(), DEC); Cell.println();
