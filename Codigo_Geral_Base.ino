@@ -58,7 +58,7 @@
   RTC_DS1307 Ck;
 
 // Configuração do SD Card:
-  const int SS = 4;
+  const int CS = 4;
   
 void setup(){
   TempHum.begin(); Cell.begin(9600); Wire.begin (); Ck.begin ();
@@ -75,7 +75,7 @@ void setup(){
   getTime(); // Obtem a hora do RTC.
   checkSensor(); // Checa se os sensores estão ligados.
   Cell.print("Procurando Cartão SD...");
-  if(!SD.begin(SS)){
+  if(!SD.begin(CS)){
     Cell.println("Cartão SD não encontrado!!!");
     while(true);
   }
