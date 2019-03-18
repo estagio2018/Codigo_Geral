@@ -4,132 +4,99 @@
 #ifndef _RTCLIB_H_
 #define _RTCLIB_H_
 
-#include <Arduino.h>
-class TimeSpan;
+#if defined(ARDUINO) && ARDUINO >= 100
+	#include "Arduino.h"
+#else
+	#include "WProgram.h"
+#endif
 
+#define DS1307_ADDR_R	209
+#define DS1307_ADDR_W	208
 
-#define PCF8523_ADDRESS       0x68
-#define PCF8523_CLKOUTCONTROL 0x0F
-#define PCF8523_CONTROL_3     0x02
+#define FORMAT_SHORT	1
+#define FORMAT_LONG		2
 
-#define DS1307_ADDRESS  0x68
-#define DS1307_CONTROL  0x07
-#define DS1307_NVRAM    0x08
+#define FORMAT_LITTLEENDIAN	1
+#define FORMAT_BIGENDIAN	2
+#define FORMAT_MIDDLEENDIAN	3
 
-#define DS3231_ADDRESS  0x68
-#define DS3231_CONTROL  0x0E
-#define DS3231_STATUSREG 0x0F
+#define MONDAY		1
+#define TUESDAY		2
+#define WEDNESDAY	3
+#define THURSDAY	4
+#define FRIDAY		5
+#define SATURDAY	6
+#define SUNDAY		7
 
-#define SECONDS_PER_DAY 86400L
+#define SQW_RATE_1		0
+#define SQW_RATE_4K		1
+#define SQW_RATE_8K		2
+#define SQW_RATE_32K	3
 
-#define SECONDS_FROM_1970_TO_2000 946684800
-
-
-
-// Simple general-purpose date/time class (no TZ / DST / leap second handling!)
-class DateTime {
+class Time
+{
 public:
-    DateTime (uint32_t t = 0);
-    DateTime (uint16_t year, uint8_t month, uint8_t day,
-                uint8_t hour = 0, uint8_t min = 0, uint8_t sec = 0);
-    DateTime (const DateTime& copy);
-    DateTime (const char* date, const char* time);
-    DateTime (const __FlashStringHelper* date, const __FlashStringHelper* time);
-    uint16_t year() const       { return 2000 + yOff; }
-    uint8_t month() const       { return m; }
-    uint8_t day() const         { return d; }
-    uint8_t hour() const        { return hh; }
-    uint8_t minute() const      { return mm; }
-    uint8_t second() const      { return ss; }
-    uint8_t dayOfTheWeek() const;
+	uint8_t		hour;
+	uint8_t		min;
+	uint8_t		sec;
+	uint8_t		date;
+	uint8_t		mon;
+	uint16_t	year;
+	uint8_t		dow;
 
-    // 32-bit times as seconds since 1/1/2000
-    long secondstime() const;   
-    // 32-bit times as seconds since 1/1/1970
-    uint32_t unixtime(void) const;
-
-    DateTime operator+(const TimeSpan& span);
-    DateTime operator-(const TimeSpan& span);
-    TimeSpan operator-(const DateTime& right);
-
-protected:
-    uint8_t yOff, m, d, hh, mm, ss;
+		Time();
 };
 
-// Timespan which can represent changes in time with seconds accuracy.
-class TimeSpan {
+class DS1307_RAM
+{
 public:
-    TimeSpan (int32_t seconds = 0);
-    TimeSpan (int16_t days, int8_t hours, int8_t minutes, int8_t seconds);
-    TimeSpan (const TimeSpan& copy);
-    int16_t days() const         { return _seconds / 86400L; }
-    int8_t  hours() const        { return _seconds / 3600 % 24; }
-    int8_t  minutes() const      { return _seconds / 60 % 60; }
-    int8_t  seconds() const      { return _seconds % 60; }
-    int32_t totalseconds() const { return _seconds; }
+	byte	cell[56];
 
-    TimeSpan operator+(const TimeSpan& right);
-    TimeSpan operator-(const TimeSpan& right);
-
-protected:
-    int32_t _seconds;
+		DS1307_RAM();
 };
 
-// RTC based on the DS1307 chip connected via I2C and the Wire library
-enum Ds1307SqwPinMode { OFF = 0x00, ON = 0x80, SquareWave1HZ = 0x10, SquareWave4kHz = 0x11, SquareWave8kHz = 0x12, SquareWave32kHz = 0x13 };
-
-class RTC_DS1307 {
+class DS1307
+{
 public:
-    boolean begin(void);
-    static void adjust(const DateTime& dt);
-    uint8_t isrunning(void);
-    static DateTime now();
-    static Ds1307SqwPinMode readSqwPinMode();
-    static void writeSqwPinMode(Ds1307SqwPinMode mode);
-    uint8_t readnvram(uint8_t address);
-    void readnvram(uint8_t* buf, uint8_t size, uint8_t address);
-    void writenvram(uint8_t address, uint8_t data);
-    void writenvram(uint8_t address, uint8_t* buf, uint8_t size);
+		DS1307(uint8_t data_pin, uint8_t sclk_pin);
+	Time	getTime();
+	void	setTime(uint8_t hour, uint8_t min, uint8_t sec);
+	void	setDate(uint8_t date, uint8_t mon, uint16_t year);
+	void	setDOW(uint8_t dow);
+
+	char	*getTimeStr(uint8_t format=FORMAT_LONG);
+	char	*getDateStr(uint8_t slformat=FORMAT_LONG, uint8_t eformat=FORMAT_LITTLEENDIAN, char divider='.');
+	char	*getDOWStr(uint8_t format=FORMAT_LONG);
+	char	*getMonthStr(uint8_t format=FORMAT_LONG);
+
+	void	halt(bool value);
+	void	setOutput(bool enable);
+	void	enableSQW(bool enable);
+	void	setSQWRate(int rate);
+
+	void		writeBuffer(DS1307_RAM r);
+	DS1307_RAM	readBuffer();
+	void		poke(uint8_t addr, uint8_t value);
+	uint8_t		peek(uint8_t addr);
+
+private:
+	uint8_t _scl_pin;
+	uint8_t _sda_pin;
+	uint8_t _burstArray[8];
+
+	void	_sendStart(byte addr);
+	void	_sendStop();
+	void	_sendAck();
+	void	_sendNack();
+	void	_waitForAck();
+	uint8_t	_readByte();
+	void	_writeByte(uint8_t value);
+	void	_burstRead();
+	uint8_t	_readRegister(uint8_t reg);
+	void 	_writeRegister(uint8_t reg, uint8_t value);
+	uint8_t	_decode(uint8_t value);
+	uint8_t	_decodeH(uint8_t value);
+	uint8_t	_decodeY(uint8_t value);
+	uint8_t	_encode(uint8_t vaule);
 };
-
-// RTC based on the DS3231 chip connected via I2C and the Wire library
-enum Ds3231SqwPinMode { DS3231_OFF = 0x01, DS3231_SquareWave1Hz = 0x00, DS3231_SquareWave1kHz = 0x08, DS3231_SquareWave4kHz = 0x10, DS3231_SquareWave8kHz = 0x18 };
-
-class RTC_DS3231 {
-public:
-    boolean begin(void);
-    static void adjust(const DateTime& dt);
-    bool lostPower(void);
-    static DateTime now();
-    static Ds3231SqwPinMode readSqwPinMode();
-    static void writeSqwPinMode(Ds3231SqwPinMode mode);
-};
-
-
-// RTC based on the PCF8523 chip connected via I2C and the Wire library
-enum Pcf8523SqwPinMode { PCF8523_OFF = 7, PCF8523_SquareWave1HZ = 6, PCF8523_SquareWave32HZ = 5, PCF8523_SquareWave1kHz = 4, PCF8523_SquareWave4kHz = 3, PCF8523_SquareWave8kHz = 2, PCF8523_SquareWave16kHz = 1, PCF8523_SquareWave32kHz = 0 };
-
-class RTC_PCF8523 {
-public:
-    boolean begin(void);
-    void adjust(const DateTime& dt);
-    boolean initialized(void);
-    static DateTime now();
-
-    Pcf8523SqwPinMode readSqwPinMode();
-    void writeSqwPinMode(Pcf8523SqwPinMode mode);
-};
-
-// RTC using the internal millis() clock, has to be initialized before use
-// NOTE: this clock won't be correct once the millis() timer rolls over (>49d?)
-class RTC_Millis {
-public:
-    static void begin(const DateTime& dt) { adjust(dt); }
-    static void adjust(const DateTime& dt);
-    static DateTime now();
-
-protected:
-    static long offset;
-};
-
-#endif // _RTCLIB_H_
+#endif
