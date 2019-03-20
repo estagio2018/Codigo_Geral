@@ -27,7 +27,6 @@
     
     
 //Bibliotecas:
-  //#include <SoftwareSerial.h> 
   #include <DHT.h>
   #include <Wire.h>
   #include <RTClib.h>
@@ -54,7 +53,6 @@
   float S2_M, S3_M, S4_M, S5_M, S6_M, S7_M, S8_M, S9_M, S131_M, S135_M;
   
 // Configuração do Hc05:
-  //SoftwareSerial Cell(2,3);
   int Option, Marker;
   int Time = 1;
 
