@@ -146,7 +146,7 @@ void checkSensor(){
 }
 
 void writeOption(){
-  Serial1.println(""); Serial1.write(Option); Serial1.println(""); Serial1.println("");
+  Serial1.println(""); Serial1.print("Eu: "); Serial1.write(Option); Serial1.println(""); Serial1.println("");
 }
       
       
