@@ -151,6 +151,7 @@ void writeOption(){
       
       
 void reading(){
+  Serial1.print(F(" - "));
   float Humidity = TempHum.readHumidity();
   float Temperature = TempHum.readTemperature();
   Serial1.print(F("Temperatura= ")); Serial1.print(Temperature); Serial1.print(F("°C "));
@@ -161,14 +162,25 @@ void reading(){
 void getDate(){
   Serial1.println("");
   DateTime now = Ck.now();
-  Serial1.print(now.day(), DEC); Serial1.print("/");
-  Serial1.print(now.month(), DEC); Serial1.print("/");
-  Serial1.print(now.year(), DEC); Serial1.print(" - ");
+  if(now.day() < 10){ Serial1.print("0"); Serial1.print(now.day(), DEC);}
+  else {Serial1.print(now.day(), DEC);}
+  Serial1.print("/");
+  if(now.month() < 10){ Serial1.print("0"); Serial1.print(now.month(), DEC);}
+  else {Serial1.print(now.month(), DEC);}
+  Serial1.print("/");
+  if(now.year() < 10){ Serial1.print("0"); Serial1.print(now.year(), DEC);}
+  else {Serial1.print(now.year(), DEC);}
+  Serial1.print(" - ");
 }
 
 void getTime(){
   DateTime now = Ck.now();
-  Serial1.print(now.hour(), DEC); Serial1.print(":");
-  Serial1.print(now.minute(), DEC); Serial1.print(":");
-  Serial1.print(now.second(), DEC);
+  if(now.hour() < 10){ Serial1.print("0"); Serial1.print(now.hour(), DEC);}
+  else{Serial1.print(now.hour(), DEC);}
+  Serial1.print(":");
+  if(now.minute() < 10){ Serial1.print("0"); Serial1.print(now.minute(), DEC);}
+  else{Serial1.print(now.minute(), DEC);}
+  Serial1.print(":");
+  if(now.second() < 10){ Serial1.print("0"); Serial1.print(now.second(), DEC);}
+  else{Serial1.print(now.second(), DEC);}
 }
