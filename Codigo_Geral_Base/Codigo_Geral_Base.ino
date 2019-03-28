@@ -37,6 +37,7 @@
   #define DHT_Pin A0
   #define DHT_Type DHT22
   DHT TempHum(DHT_Pin, DHT_Type);
+  float Humidity, Temperature, Temp_M, Hum_M;
   
 // Configuração dos sensores de gás:
   #define MQ_02 A1
@@ -53,12 +54,12 @@
   float S2_M, S3_M, S4_M, S5_M, S6_M, S7_M, S8_M, S9_M, S131_M, S135_M;
   
 // Configuração do Hc05:
-  int Option, Marker;
+  int Option, Marker, x;
   int Time = 1;
 
 // Configuração do RTC:
   RTC_DS1307 Ck;
-
+                                                                                 
 // Configuração do SD Card:
   const int CS = 4;
   
@@ -68,24 +69,13 @@ void setup(){
   Serial1.println("Inicializando..."); Serial1.println(""); delay(1000);
   pinMode(MQ_02, INPUT); pinMode(MQ_03, INPUT); pinMode(MQ_04, INPUT); pinMode(MQ_05, INPUT); pinMode(MQ_06, INPUT);
   pinMode(MQ_07, INPUT); pinMode(MQ_08, INPUT); pinMode(MQ_09, INPUT); pinMode(MQ_131, INPUT); pinMode(MQ_135, INPUT);
-  for(int x=0; x<5; x++){
-    S2 += analogRead(MQ_02); S3 += analogRead(MQ_03); S4 += analogRead(MQ_04); S5 += analogRead(MQ_05); S6 += analogRead(MQ_06);
-    S7 += analogRead(MQ_07); S8 += analogRead(MQ_08); S9 += analogRead(MQ_09); S131 += analogRead(MQ_131); S135 += analogRead(MQ_135);
-    S2_M = S2/5; S3_M = S3/5; S4_M = S4/5; S5_M = S5/5; S6_M = S6/5; S7_M = S7/5; S8_M = S8/5; S9_M = S9/5; S131_M = S131/5; S135_M = S135/5;
-  }
-  while(!Ck.isrunning()){
-    Serial1.println("O relógio não está funcionando!");
-    Ck.adjust(DateTime(__DATE__, __TIME__));
-  }
-  getDate(); // Obtem a data do RTC.
-  getTime(); // Obtem a hora do RTC.
-  checkSensor(); // Checa se os sensores estão ligados.
+  while(!Ck.isrunning()){Serial1.println("O relógio não está funcionando!"); Ck.adjust(DateTime(__DATE__, __TIME__));}
+  getDate(); getTime(); // Obtem data e hora do RTC.
+  mean(); checkSensor(); // Checa se os sensores estão ligados.
   Serial1.print("Procurando Cartão SD..."); delay(1000);
   while(!SD.begin(CS)){ Serial1.println(" Cartão SD não encontrado!!!"); Serial1.println(""); Serial1.println("");}
   Serial1.write("Cartão SD conectado!!!"); Serial1.println(""); Serial1.println("");
-  Marker = 0;
-  Option = Serial1.read();
-  Option = 0;
+  header(); Marker = 0; Option = Serial1.read(); Option = 0;
 }
 
 void loop(){
@@ -119,13 +109,19 @@ void loop(){
     case 7: Time = 300; writeOption(); getTime(); reading(); break;
     case 8: Time = 600; writeOption(); getTime(); reading(); break;
     case 9: writeOption(); Option = 0; Marker = 0; break;
-    default: writeOption(); 
-             Serial1.println(""); 
-             Serial1.println(F(""));
+    default: writeOption(); Serial1.println(""); Serial1.println(F(""));
              Serial1.println(F("Desculpe, essa opção não"));
-             Serial1.println(F("está disponível."));
-             Serial1.println(F("")); break;
+             Serial1.println(F("está disponível.")); Serial1.println(F("")); break;
     }
+}
+
+void mean(){
+  for(x=0; x<5; x++){
+    S2 += analogRead(MQ_02); S3 += analogRead(MQ_03); S4 += analogRead(MQ_04); S5 += analogRead(MQ_05); S6 += analogRead(MQ_06);
+    S7 += analogRead(MQ_07); S8 += analogRead(MQ_08); S9 += analogRead(MQ_09); S131 += analogRead(MQ_131); S135 += analogRead(MQ_135);
+    Humidity = TempHum.readHumidity(); Temperature = TempHum.readTemperature();}
+    S2_M = S2/x; S3_M = S3/x; S4_M = S4/x; S5_M = S5/x; S6_M = S6/x; S7_M = S7/x; S8_M = S8/x; S9_M = S9/x; S131_M = S131/x; S135_M = S135/x;
+    Hum_M = Humidity/x; Temp_M = Temperature/x;
 }
 
 void checkSensor(){
@@ -142,18 +138,26 @@ void checkSensor(){
   if(S131_M >= 360 && S131_M >= 585) {Serial1.println(F("Sensor MQ131: OK!")); delay(300);} else {Serial1.println(F("Sensor MQ131: Não Conectado!")); delay(300);}
   if(S135_M >= 360 && S135_M >= 585) {Serial1.println(F("Sensor MQ135: OK!")); delay(300);} else {Serial1.println(F("Sensor MQ135: Não Conectado!")); delay(300);}
   Serial1.println(""); Serial1.println("");
-  delay(500);
 }
 
-void writeOption(){
-  Serial1.println(""); Serial1.print("Eu: "); Serial1.write(Option); Serial1.println(""); Serial1.println("");
+void header(){
+  File data = SD.open("analise.txt", FILE_WRITE);
+  if(!data){Serial1.println("***Erro ao abrir documento de texto.***");}
+  else{
+    data.print("Experimento iniciado no dia ");
+    DateTime now = Ck.now();
+    if(now.day() < 10){ data.print("0"); data.print(now.day(), DEC);} else {data.print(now.day(), DEC);} data.print("/");
+    if(now.month() < 10){ data.print("0"); data.print(now.month(), DEC);} else {data.print(now.month(), DEC);} data.print("/");
+    if(now.year() < 10){ data.print("0"); data.print(now.year(), DEC);} else {data.print(now.year(), DEC);} data.print(" às ");
+    reportTime(); data.print("."); data.println(""); data.println(""); data.print("    Dados em média dos sensores:"); data.println(""); data.close();}
 }
-      
-      
+
+void writeOption(){ Serial1.println(""); Serial1.print("Eu: "); Serial1.write(Option); Serial1.println(""); Serial1.println("");}      
+
 void reading(){
   Serial1.print(F(" - "));
-  float Humidity = TempHum.readHumidity();
-  float Temperature = TempHum.readTemperature();
+  Humidity = TempHum.readHumidity();
+  Temperature = TempHum.readTemperature();
   Serial1.print(F("Temperatura= ")); Serial1.print(Temperature); Serial1.print(F("°C "));
   Serial1.print(F(" Umidade= ")); Serial1.print(Humidity); Serial1.println(F("% "));
   delay(Time*1000); Marker = 1;
@@ -163,24 +167,38 @@ void getDate(){
   Serial1.println("");
   DateTime now = Ck.now();
   if(now.day() < 10){ Serial1.print("0"); Serial1.print(now.day(), DEC);}
-  else {Serial1.print(now.day(), DEC);}
-  Serial1.print("/");
+  else {Serial1.print(now.day(), DEC);} Serial1.print("/");
   if(now.month() < 10){ Serial1.print("0"); Serial1.print(now.month(), DEC);}
-  else {Serial1.print(now.month(), DEC);}
-  Serial1.print("/");
+  else {Serial1.print(now.month(), DEC);} Serial1.print("/");
   if(now.year() < 10){ Serial1.print("0"); Serial1.print(now.year(), DEC);}
-  else {Serial1.print(now.year(), DEC);}
-  Serial1.print(" - ");
+  else {Serial1.print(now.year(), DEC);} Serial1.print(" - ");
 }
 
 void getTime(){
   DateTime now = Ck.now();
   if(now.hour() < 10){ Serial1.print("0"); Serial1.print(now.hour(), DEC);}
-  else{Serial1.print(now.hour(), DEC);}
-  Serial1.print(":");
+  else{Serial1.print(now.hour(), DEC);} Serial1.print(":");
   if(now.minute() < 10){ Serial1.print("0"); Serial1.print(now.minute(), DEC);}
-  else{Serial1.print(now.minute(), DEC);}
-  Serial1.print(":");
+  else{Serial1.print(now.minute(), DEC);} Serial1.print(":");
   if(now.second() < 10){ Serial1.print("0"); Serial1.print(now.second(), DEC);}
   else{Serial1.print(now.second(), DEC);}
+}
+
+void reportTime(){
+  File data = SD.open("analise.txt", FILE_WRITE);
+  if(!data){ Serial1.println("***Erro ao abrir documento de texto.***");}
+  else{
+    DateTime now = Ck.now();
+    if(now.hour() < 10){ data.print("0"); data.print(now.hour(), DEC);} else{data.print(now.hour(), DEC);} data.print(":");
+    if(now.minute() < 10){ data.print("0"); data.print(now.minute(), DEC);} else{data.print(now.minute(), DEC);} data.print(":");
+    if(now.second() < 10){ data.print("0"); data.print(now.second(), DEC);} else{data.print(now.second(), DEC);}
+  }
+}
+
+void report(){
+  File data = SD.open("analise.txt", FILE_WRITE);
+  if(!data){ Serial1.println("***Erro ao abrir documento de texto.***");}
+  else{
+    data.print("      "); data.print("");
+  }
 }
