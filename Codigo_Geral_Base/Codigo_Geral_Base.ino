@@ -113,26 +113,26 @@ void checkSensor(){
   mean();
   Serial1.println(""); Serial.println("");
   Serial1.println("Checagem de Sensores:"); Serial1.println("Checagem de Sensores:");
-  if(S2_M != 0) {Serial1.println(F("   Sensor MQ02:   OK!")); Serial.println(F("   Sensor MQ02:   OK!"));}
-      else {Serial1.println(F("   Sensor MQ02:   Não Conectado!")); Serial.println(F("   Sensor MQ02:   Não Conectado!"));}
-  if(S3_M != 0) {Serial1.println(F("   Sensor MQ03:   OK!")); Serial.println(F("   Sensor MQ03:   OK!"));}
-      else {Serial1.println(F("   Sensor MQ03:   Não Conectado!")); Serial.println(F("   Sensor MQ03:   Não Conectado!"));}
-  if(S4_M != 0) {Serial1.println(F("   Sensor MQ04:   OK!")); Serial.println(F("   Sensor MQ04:   OK!"));}
-      else {Serial1.println(F("   Sensor MQ04:   Não Conectado!"));}
-  if(S5_M != 0) {Serial1.println(F("   Sensor MQ05:   OK!")); Serial.println(F("   Sensor MQ05:   OK!"));}
-      else {Serial1.println(F("   Sensor MQ05:   Não Conectado!")); Serial.println(F("   Sensor MQ05:   Não Conectado!"));}
-  if(S6_M != 0) {Serial1.println(F("   Sensor MQ06:   OK!")); Serial.println(F("   Sensor MQ06:   OK!"));} 
-      else {Serial1.println(F("   Sensor MQ06:   Não Conectado!")); Serial.println(F("   Sensor MQ06:   Não Conectado!"));}
-  if(S7_M != 0) {Serial1.println(F("   Sensor MQ07:   OK!")); Serial.println(F("   Sensor MQ07:   OK!"));} 
-      else {Serial1.println(F("   Sensor MQ07:   Não Conectado!")); Serial.println(F("   Sensor MQ07:   Não Conectado!"));}
-  if(S8_M != 0) {Serial1.println(F("   Sensor MQ08:   OK!")); Serial.println(F("   Sensor MQ08:   OK!"));}
-      else {Serial1.println(F("   Sensor MQ08:   Não Conectado!")); Serial.println(F("   Sensor MQ08:   Não Conectado!"));}
-  if(S9_M != 0) {Serial1.println(F("   Sensor MQ09:   OK!")); Serial.println(F("   Sensor MQ09:   OK!"));}
-      else {Serial1.println(F("   Sensor MQ09:   Não Conectado!")); Serial.println(F("   Sensor MQ09:   Não Conectado!"));}
-  if(S131_M != 0) {Serial1.println(F("   Sensor MQ131: OK!")); Serial.println(F("   Sensor MQ131: OK!"));}
-      else {Serial1.println(F("   Sensor MQ131: Não Conectado!")); Serial.println(F("    Sensor MQ131: Não Conectado!"));}
-  if(S135_M != 0) {Serial1.println(F("   Sensor MQ135: OK!")); Serial1.println(F("   Sensor MQ135: OK!"));}
-      else {Serial1.println(F("   Sensor MQ135: Não Conectado!")); Serial.println(F("    Sensor MQ135: Não Conectado!"));}
+  if(S2_M != 0) {Serial1.println(F("   Sensor MQ02:   OK!")); Serial.print(F("Sensor MQ02:")); Serial.print("\t"); Serial.println("OK!");}
+      else {Serial1.println(F("   Sensor MQ02:   Não Conectado!")); Serial.print(F("Sensor MQ02:")); Serial.print("\t"); Serial.println("Não Conectado!");}
+  if(S3_M != 0) {Serial1.println(F("   Sensor MQ03:   OK!")); Serial.print(F("Sensor MQ03:")); Serial.print("\t"); Serial.println("OK!");}
+      else {Serial1.println(F("   Sensor MQ03:   Não Conectado!")); Serial.print(F("Sensor MQ03:")); Serial.print("\t"); Serial.println("Não Conectado!");}
+  if(S4_M != 0) {Serial1.println(F("   Sensor MQ04:   OK!")); Serial.print(F("Sensor MQ04:")); Serial.print("\t"); Serial.println("OK!");}
+      else {Serial1.println(F("   Sensor MQ04:   Não Conectado!")); Serial.print(F("Sensor MQ04:")); Serial.print("\t"); Serial.println("Não Conectado!");}
+  if(S5_M != 0) {Serial1.println(F("   Sensor MQ05:   OK!")); Serial.print(F("Sensor MQ05:")); Serial.print("\t"); Serial.println("OK!");}
+      else {Serial1.println(F("   Sensor MQ05:   Não Conectado!")); Serial.print(F("Sensor MQ05:")); Serial.print("\t"); Serial.println("Não Conectado!");}
+  if(S6_M != 0) {Serial1.println(F("   Sensor MQ06:   OK!")); Serial.print(F("Sensor MQ06:")); Serial.print("\t"); Serial.println("OK!");} 
+      else {Serial1.println(F("   Sensor MQ06:   Não Conectado!")); Serial.print(F("Sensor MQ06:")); Serial.print("\t"); Serial.println("Não Conectado!");}
+  if(S7_M != 0) {Serial1.println(F("   Sensor MQ07:   OK!")); Serial.print(F("Sensor MQ07:")); Serial.print("\t"); Serial.println("OK!");} 
+      else {Serial1.println(F("   Sensor MQ07:   Não Conectado!")); Serial.print(F("Sensor MQ07:")); Serial.print("\t"); Serial.println("Não Conectado!");}
+  if(S8_M != 0) {Serial1.println(F("   Sensor MQ08:   OK!")); Serial.print(F("Sensor MQ08:")); Serial.print("\t"); Serial.println("OK!");}
+      else {Serial1.println(F("   Sensor MQ08:   Não Conectado!")); Serial.print(F("Sensor MQ08:")); Serial.print("\t"); Serial.println("Não Conectado!");}
+  if(S9_M != 0) {Serial1.println(F("   Sensor MQ09:   OK!")); Serial.print(F("Sensor MQ09:")); Serial.print("\t"); Serial.println("OK!");}
+      else {Serial1.println(F("   Sensor MQ09:   Não Conectado!")); Serial.print(F("Sensor MQ09:")); Serial.print("\t"); Serial.println("Não Conectado!");}
+  if(S131_M != 0) {Serial1.println(F("   Sensor MQ131: OK!")); Serial.print(F("Sensor MQ131:")); Serial.print("\t"); Serial.println("OK!");}
+      else {Serial1.println(F("   Sensor MQ131: Não Conectado!")); Serial.print(F("Sensor MQ131:")); Serial.print("\t"); Serial.println("Não Conectado!");}
+  if(S135_M != 0) {Serial1.println(F("   Sensor MQ135: OK!")); Serial.print(F("Sensor MQ135:")); Serial.print("\t"); Serial.println("OK!");}
+      else {Serial1.println(F("   Sensor MQ135: Não Conectado!")); Serial.print(F("Sensor MQ135:")); Serial.print("\t"); Serial.println("Não Conectado!");}
   Serial1.println(""); Serial1.println(""); Serial.println(""); Serial.println(""); 
 }
 
@@ -148,16 +148,16 @@ void MQSensor(){
   Serial1.print(F("Sensor MQ09:  ")); Serial1.print(S9_M); Serial1.println("   ");
   Serial1.print(F("Sensor MQ131: ")); Serial1.print(S131_M); Serial1.print("   ");
   Serial1.print(F("Sensor MQ135: ")); Serial1.print(S135_M); Serial1.println("   "); Serial1.println("");
-  Serial.print(F("Sensor MQ02:  ")); Serial.print(S2_M); Serial.print("   ");
-  Serial.print(F("Sensor MQ03:  ")); Serial.print(S3_M); Serial.println("   ");
-  Serial.print(F("Sensor MQ04:  ")); Serial.print(S4_M); Serial.print("   ");
-  Serial.print(F("Sensor MQ05:  ")); Serial.print(S5_M); Serial.println("   ");
-  Serial.print(F("Sensor MQ06:  ")); Serial.print(S6_M); Serial.print("   ");
-  Serial.print(F("Sensor MQ07:  ")); Serial.print(S7_M); Serial.println("   ");
-  Serial.print(F("Sensor MQ08:  ")); Serial.print(S8_M); Serial.print("   ");
-  Serial.print(F("Sensor MQ09:  ")); Serial.print(S9_M); Serial.println("   ");
-  Serial.print(F("Sensor MQ131: ")); Serial.print(S131_M); Serial.print("   ");
-  Serial.print(F("Sensor MQ135: ")); Serial.print(S135_M); Serial.println("   "); Serial.println("");
+  Serial.print(F("Sensor MQ02:")); Serial.print("\t"); Serial.print(S2_M); Serial.print("\t");
+  Serial.print(F("Sensor MQ03:")); Serial.print("\t"); Serial.print(S3_M); Serial.print("\t");
+  Serial.print(F("Sensor MQ04:")); Serial.print("\t"); Serial.print(S4_M); Serial.print("\t");
+  Serial.print(F("Sensor MQ05:")); Serial.print("\t"); Serial.print(S5_M); Serial.print("\t");
+  Serial.print(F("Sensor MQ06:")); Serial.print("\t"); Serial.print(S6_M); Serial.print("\t");
+  Serial.print(F("Sensor MQ07:")); Serial.print("\t"); Serial.print(S7_M); Serial.print("\t");
+  Serial.print(F("Sensor MQ08:")); Serial.print("\t"); Serial.print(S8_M); Serial.print("\t");
+  Serial.print(F("Sensor MQ09:")); Serial.print("\t"); Serial.print(S9_M); Serial.print("\t");
+  Serial.print(F("Sensor MQ131:")); Serial.print("\t"); Serial.print(S131_M); Serial.print("\t");
+  Serial.print(F("Sensor MQ135:")); Serial.print("\t"); Serial.print(S135_M); Serial.println("\t"); Serial.println("");
 }
 void header(){
   data = SD.open("analise.txt", FILE_WRITE);
@@ -182,7 +182,7 @@ void header(){
 void writeOption(){ 
   if(Serial1.available() > 48){
     Serial1.read(); Serial1.println(""); Serial1.print("Eu: "); Serial1.write(Option); Serial1.println(""); Serial1.println(""); Serial1.flush();
-    Serial.read(); Serial.println(""); Serial.print("Eu: "); Serial.write(Option); Serial.println(""); Serial.println("");
+    Serial.read(); Serial.println(""); Serial.print("Eu:"); Serial.print("\t"); Serial.write(Option); Serial.println(""); Serial.println("");
   }      
 }
 
@@ -190,10 +190,10 @@ void reading(){
   if(millis() - tempo1 > (Time)){
     Serial1.print(F(" - ")); Serial.print(F(" - "));
     Humidity = TempHum.readHumidity(); Temperature = TempHum.readTemperature();
-    Serial1.print(F("Temperatura= ")); Serial1.print(Temperature); Serial1.print(F("°C "));
-    Serial1.print(F(" Umidade= ")); Serial1.print(Humidity); Serial1.println(F("% "));
-    Serial.print(F("Temperatura= ")); Serial.print(Temperature); Serial.print(F("°C "));
-    Serial.print(F(" Umidade= ")); Serial.print(Humidity); Serial.println(F("% "));
+    Serial1.print(F(" Temp.: ")); Serial1.print(Temperature); Serial1.print(F("°C "));
+    Serial1.print(F(" Umid.: ")); Serial1.print(Humidity); Serial1.println(F("% "));
+    Serial.print(F("Temp.:")); Serial.print("\t"); Serial.print(Temperature); Serial.print("\t"); Serial.print(F("°C ")); Serial.print("\t");
+    Serial.print(F("Umid.:")); Serial.print("\t"); Serial.print(Humidity); Serial.print("\t"); Serial.println(F("% ")); Serial.print("\t");
     tempo1 = millis();
   }
 }
@@ -227,7 +227,7 @@ void reportTime(){
 
 void report(){
   data = SD.open("analise.txt", FILE_WRITE);
-  if(!data){ Serial1.println("***Erro ao abrir documento de texto.***"); Serial.println("***Erro ao abrir documento de texto.***");}
+  if(!data){ Serial1.println("***Erro ao abrir documento de texto.***"); Serial.println("***Erro ao abrir documento de texto.***"); Serial.print("\t");}
   else{
     data.print("\t"); reportTime(); data.print("\t"); data.print(Temperature); data.print("°C"); data.print("\t");
     data.print(Humidity); data.print("%"); data.print("\t"); 
