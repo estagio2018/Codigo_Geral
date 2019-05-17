@@ -159,20 +159,23 @@ void MQSensor(){
   Serial.print(F("Sensor MQ131: ")); Serial.print(S131_M); Serial.print("   ");
   Serial.print(F("Sensor MQ135: ")); Serial.print(S135_M); Serial.println("   "); Serial.println("");
 }
-
 void header(){
   data = SD.open("analise.txt", FILE_WRITE);
   if(!data){
     Serial1.println("   ***Erro ao abrir documento de texto.***   ");
     Serial.println("   ***Erro ao abrir documento de texto.***   ");}
   else{
-    data.println(""); data.print("Experimento iniciado no dia ");
+    data.print("Experimento iniciado no dia ");
     DateTime now = rtc.now();
     if(now.day() < 10){ data.print("0"); data.print(now.day(), DEC);} else {data.print(now.day(), DEC);} data.print("/");
     if(now.month() < 10){ data.print("0"); data.print(now.month(), DEC);} else {data.print(now.month(), DEC);} data.print("/");
     if(now.year() < 10){ data.print("0"); data.print(now.year(), DEC);} else {data.print(now.year(), DEC);} data.print(" às ");
     reportTime(); data.print("."); data.println(""); data.println(""); data.print("    Dados em média dos sensores:"); data.println(""); 
-    data.println("        Time   Temperature Humididty   MQ02     MQ03     MQ04     MQ05     MQ06     MQ07     MQ08     MQ09    MQ131    MQ135"); data.close();
+    data.print("\t"); data.print("Horas"); data.print("\t"); data.print("Temp."); data.print("\t");
+    data.print("Umid."); data.print("\t"); data.print("MQ02"); data.print("\t"); data.print("MQ03"); data.print("\t"); 
+    data.print("MQ04"); data.print("\t"); data.print("MQ05"); data.print("\t"); data.print("MQ06"); data.print("\t"); 
+    data.print("MQ07"); data.print("\t"); data.print("MQ08"); data.print("\t"); data.print("MQ09"); data.print("\t");
+    data.print("MQ131"); data.print("\t"); data.print("MQ0135"); data.print("\t"); data.println(""); data.close();
   }
 }
 
@@ -226,17 +229,17 @@ void report(){
   data = SD.open("analise.txt", FILE_WRITE);
   if(!data){ Serial1.println("***Erro ao abrir documento de texto.***"); Serial.println("***Erro ao abrir documento de texto.***");}
   else{
-    data.print("      "); reportTime(); data.print("   "); data.print(Temperature); data.print("°C"); data.print("    ");
-    data.print(Humidity); data.print("%"); data.print("     "); 
-    if(S2_M < 100){data.print("0"); data.print(S2_M);} else {data.print(S2_M);} data.print("       ");
-    if(S3_M < 100){data.print("0"); data.print(S3_M);} else {data.print(S3_M);} data.print("      "); 
-    if(S4_M < 100){data.print("0"); data.print(S4_M);} else {data.print(S4_M);} data.print("      ");
-    if(S5_M < 100){data.print("0"); data.print(S5_M);} else {data.print(S5_M);} data.print("      ");
-    if(S6_M < 100){data.print("0"); data.print(S6_M);} else {data.print(S6_M);} data.print("      ");
-    if(S7_M < 100){data.print("0"); data.print(S7_M);} else {data.print(S7_M);} data.print("      "); 
-    if(S8_M < 100){data.print("0"); data.print(S8_M);} else {data.print(S8_M);} data.print("      ");
-    if(S9_M < 100){data.print("0"); data.print(S9_M);} else {data.print(S9_M);} data.print("      ");
-    if(S131_M < 100){data.print("0"); data.print(S131_M);} else {data.print(S131_M);} data.print("      "); 
+    data.print("\t"); reportTime(); data.print("\t"); data.print(Temperature); data.print("°C"); data.print("\t");
+    data.print(Humidity); data.print("%"); data.print("\t"); 
+    if(S2_M < 100){data.print("0"); data.print(S2_M);} else {data.print(S2_M);} data.print("\t");
+    if(S3_M < 100){data.print("0"); data.print(S3_M);} else {data.print(S3_M);} data.print("\t"); 
+    if(S4_M < 100){data.print("0"); data.print(S4_M);} else {data.print(S4_M);} data.print("\t");
+    if(S5_M < 100){data.print("0"); data.print(S5_M);} else {data.print(S5_M);} data.print("\t");
+    if(S6_M < 100){data.print("0"); data.print(S6_M);} else {data.print(S6_M);} data.print("\t");
+    if(S7_M < 100){data.print("0"); data.print(S7_M);} else {data.print(S7_M);} data.print("\t"); 
+    if(S8_M < 100){data.print("0"); data.print(S8_M);} else {data.print(S8_M);} data.print("\t");
+    if(S9_M < 100){data.print("0"); data.print(S9_M);} else {data.print(S9_M);} data.print("\t");
+    if(S131_M < 100){data.print("0"); data.print(S131_M);} else {data.print(S131_M);} data.print("\t"); 
     if(S135_M < 100){data.print("0"); data.print(S135_M);} else {data.print(S135_M);} data.println(""); data.close();
   }
 }
