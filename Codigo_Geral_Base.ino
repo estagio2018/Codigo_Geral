@@ -67,23 +67,23 @@
   #define CS 4
   File data;
 
-void mean(void); void checkSensor(void);
-void header(void); void writeOption(void);
+void mean(void);    void checkSensor(void);
+void header(void);  void writeOption(void);
 void reading(void); void getDate(void);
 void getTime(void); void reportTime(void);
-void report(void); void pulse(void);
+void report(void);  void pulse(void);
 
 void setup(){
   //Inicialização
   tempo, tempo1 = millis(); Serial.begin(9600); TempHum.begin(); Serial1.begin(9600); Wire.begin(); rtc.begin();
-  while(!Serial1.available()); Serial1.read(); Serial1.flush(); SD.begin(CS); rtc.isrunning(); rtc.adjust(DateTime(__DATE__, __TIME__));
+  while(!Serial1.available() || !Serial.available()); Serial1.read(); Serial.read(); Serial1.flush(); Serial.flush(); SD.begin(CS); rtc.isrunning(); rtc.adjust(DateTime(__DATE__, __TIME__));
   
   //Verificação dos Módulos
   Serial1.println("Inicializando..."); Serial1.println("");
-  while(!rtc.isrunning()){ Serial1.println("O relógio não está funcionando!"); Serial.println("O relógio não está funcionando!"); rtc.adjust(DateTime(__DATE__, __TIME__)); }
-  Serial1.print("Procurando Cartão SD... "); Serial.print("Procurando Cartão SD... "); delay(1000);
-  while(!SD.begin(CS)){ Serial1.println("Cartão SD não encontrado!!!"); Serial1.println(""); Serial1.println(""); Serial.println("Cartão SD não encontrado!!!"); Serial.println(""); Serial.println("");}
-  Serial1.write("Cartão SD conectado!!!"); Serial1.println(""); Serial1.println(""); Serial.write("Cartão SD conectado!!!"); Serial.println(""); Serial.println("");
+  while(!rtc.isrunning()){ Serial1.println("O relógio não está funcionando!"); rtc.adjust(DateTime(__DATE__, __TIME__)); }
+  Serial1.print("Procurando Cartão SD... "); delay(1000);
+  while(!SD.begin(CS)){ Serial1.println("Cartão SD não encontrado!!!"); Serial1.println(""); Serial1.println("");}
+  Serial1.write("Cartão SD conectado!!!"); Serial1.println(""); Serial1.println("");
   
   getDate(); getTime(); // Obtem data e hora do RTC.
   checkSensor(); // Checa se os sensores estão ligados.
@@ -148,99 +148,110 @@ void MQSensor(){
   Serial1.print(F("Sensor MQ09:  ")); Serial1.print(S9_M); Serial1.println("   ");
   Serial1.print(F("Sensor MQ131: ")); Serial1.print(S131_M); Serial1.print("   ");
   Serial1.print(F("Sensor MQ135: ")); Serial1.print(S135_M); Serial1.println("   "); Serial1.println("");
-  Serial.print(F("Sensor MQ02:")); Serial.print("\t"); Serial.print(S2_M); Serial.print("\t");
-  Serial.print(F("Sensor MQ03:")); Serial.print("\t"); Serial.print(S3_M); Serial.print("\t");
-  Serial.print(F("Sensor MQ04:")); Serial.print("\t"); Serial.print(S4_M); Serial.print("\t");
-  Serial.print(F("Sensor MQ05:")); Serial.print("\t"); Serial.print(S5_M); Serial.print("\t");
-  Serial.print(F("Sensor MQ06:")); Serial.print("\t"); Serial.print(S6_M); Serial.print("\t");
-  Serial.print(F("Sensor MQ07:")); Serial.print("\t"); Serial.print(S7_M); Serial.print("\t");
-  Serial.print(F("Sensor MQ08:")); Serial.print("\t"); Serial.print(S8_M); Serial.print("\t");
-  Serial.print(F("Sensor MQ09:")); Serial.print("\t"); Serial.print(S9_M); Serial.print("\t");
-  Serial.print(F("Sensor MQ131:")); Serial.print("\t"); Serial.print(S131_M); Serial.print("\t");
-  Serial.print(F("Sensor MQ135:")); Serial.print("\t"); Serial.print(S135_M); Serial.println("\t"); Serial.println("");
 }
+
 void header(){
   data = SD.open("analise.txt", FILE_WRITE);
   if(!data){
-    Serial1.println("   ***Erro ao abrir documento de texto.***   ");
-    Serial.println("   ***Erro ao abrir documento de texto.***   ");}
+    Serial1.println("   ***Erro ao abrir documento de texto.***   ");}
   else{
     data.print("Experimento iniciado no dia ");
     DateTime now = rtc.now();
-    if(now.day() < 10){ data.print("0"); data.print(now.day(), DEC);} else {data.print(now.day(), DEC);} data.print("/");
-    if(now.month() < 10){ data.print("0"); data.print(now.month(), DEC);} else {data.print(now.month(), DEC);} data.print("/");
-    if(now.year() < 10){ data.print("0"); data.print(now.year(), DEC);} else {data.print(now.year(), DEC);} data.print(" às ");
+    if(now.day() < 10){ data.print("0"); Serial.print("0"); data.print(now.day(), DEC); Serial.print(now.day(), DEC);} 
+      else {data.print(now.day(), DEC); Serial.print(now.day(), DEC);} data.print("/"); Serial.print("/");
+    if(now.month() < 10){ data.print("0"); Serial.print("0"); data.print(now.month(), DEC); Serial.print(now.month(), DEC);}
+      else {data.print(now.month(), DEC); Serial.print(now.month(), DEC);} data.print("/"); Serial.print("/");
+    if(now.year() < 10){ data.print("0"); data.print(now.year(), DEC); Serial.print("0"); Serial.print(now.year(), DEC);}
+      else {data.print(now.year(), DEC); Serial.print(now.year(), DEC);} data.print(" às "); Serial.print(" às ");
     reportTime(); data.print("."); data.println(""); data.println(""); data.print("    Dados em média dos sensores:"); data.println(""); 
     data.print("\t"); data.print("Horas"); data.print("\t"); data.print("Temp."); data.print("\t");
     data.print("Umid."); data.print("\t"); data.print("MQ02"); data.print("\t"); data.print("MQ03"); data.print("\t"); 
     data.print("MQ04"); data.print("\t"); data.print("MQ05"); data.print("\t"); data.print("MQ06"); data.print("\t"); 
     data.print("MQ07"); data.print("\t"); data.print("MQ08"); data.print("\t"); data.print("MQ09"); data.print("\t");
     data.print("MQ131"); data.print("\t"); data.print("MQ0135"); data.print("\t"); data.println(""); data.close();
+
+    Serial.print("."); Serial.println(""); Serial.println(""); Serial.print("Dados em média dos sensores:"); Serial.println(""); 
+    Serial.print("\t"); Serial.print("Horas"); Serial.print("\t"); Serial.print("Temp."); Serial.print("\t");
+    Serial.print("Umid."); Serial.print("\t"); Serial.print("MQ02"); Serial.print("\t"); Serial.print("MQ03"); Serial.print("\t"); 
+    Serial.print("MQ04"); Serial.print("\t"); Serial.print("MQ05"); Serial.print("\t"); Serial.print("MQ06"); Serial.print("\t"); 
+    Serial.print("MQ07"); Serial.print("\t"); Serial.print("MQ08"); Serial.print("\t"); Serial.print("MQ09"); Serial.print("\t");
+    Serial.print("MQ131"); Serial.print("\t"); Serial.print("MQ0135"); Serial.print("\t"); Serial.println("");
   }
 }
 
 void writeOption(){ 
   if(Serial1.available() > 48){
     Serial1.read(); Serial1.println(""); Serial1.print("Eu: "); Serial1.write(Option); Serial1.println(""); Serial1.println(""); Serial1.flush();
-    Serial.read(); Serial.println(""); Serial.print("Eu:"); Serial.print("\t"); Serial.write(Option); Serial.println(""); Serial.println("");
   }      
 }
 
 void reading(){
   if(millis() - tempo1 > (Time)){
-    Serial1.print(F(" - ")); Serial.print(F(" - "));
+    Serial1.print(F(" - "));
     Humidity = TempHum.readHumidity(); Temperature = TempHum.readTemperature();
     Serial1.print(F(" Temp.: ")); Serial1.print(Temperature); Serial1.print(F("°C "));
     Serial1.print(F(" Umid.: ")); Serial1.print(Humidity); Serial1.println(F("% "));
-    Serial.print(F("Temp.:")); Serial.print("\t"); Serial.print(Temperature); Serial.print("\t"); Serial.print(F("°C ")); Serial.print("\t");
-    Serial.print(F("Umid.:")); Serial.print("\t"); Serial.print(Humidity); Serial.print("\t"); Serial.println(F("% ")); Serial.print("\t");
     tempo1 = millis();
   }
 }
 
 void getDate(){
-  Serial1.println(""); Serial.println(""); DateTime now = rtc.now();
-  if(now.day() < 10){ Serial1.print("0"); Serial1.print(now.day(), DEC); Serial.print("0"); Serial.print(now.day(), DEC);}
-  else {Serial1.print(now.day(), DEC); Serial.print(now.day(), DEC);} Serial1.print("/"); Serial.print("/");
-  if(now.month() < 10){ Serial1.print("0"); Serial1.print(now.month(), DEC); Serial.print("0"); Serial.print(now.month(), DEC);}
-  else {Serial1.print(now.month(), DEC); Serial.print(now.month(), DEC);} Serial1.print("/"); Serial.print("/");
-  if(now.year() < 10){ Serial1.print("0"); Serial1.print(now.year(), DEC); Serial.print("0"); Serial.print(now.year(), DEC);}
-  else {Serial1.print(now.year(), DEC); Serial.print(now.year(), DEC);} Serial1.print(" - "); Serial.print(" - "); 
+  Serial1.println(""); DateTime now = rtc.now();
+  if(now.day() < 10){ Serial1.print("0"); Serial1.print(now.day(), DEC);}
+    else {Serial1.print(now.day(), DEC);} Serial1.print("/");
+  if(now.month() < 10){ Serial1.print("0"); Serial1.print(now.month(), DEC);}
+    else {Serial1.print(now.month(), DEC);} Serial1.print("/");
+  if(now.year() < 10){ Serial1.print("0"); Serial1.print(now.year(), DEC);}
+    else {Serial1.print(now.year(), DEC);} Serial1.print(" - ");
 }
 
 void getTime(){
   DateTime now = rtc.now();
-  if(now.hour() < 10){ Serial1.print("0"); Serial1.print(now.hour(), DEC); Serial.print("0"); Serial.print(now.hour(), DEC);}
-  else{Serial1.print(now.hour(), DEC); Serial.print(now.hour(), DEC);} Serial1.print(":"); Serial.print(":");
-  if(now.minute() < 10){ Serial1.print("0"); Serial1.print(now.minute(), DEC); Serial.print("0"); Serial.print(now.minute(), DEC);}
-  else{Serial1.print(now.minute(), DEC); Serial.print(now.minute(), DEC);} Serial1.print(":"); Serial.print(":");
-  if(now.second() < 10){ Serial1.print("0"); Serial1.print(now.second(), DEC); Serial.print("0"); Serial.print(now.second(), DEC);}
-  else{Serial1.print(now.second(), DEC); Serial.print(now.second(), DEC);} 
+  if(now.hour() < 10){ Serial1.print("0"); Serial1.print(now.hour(), DEC);}
+    else{Serial1.print(now.hour(), DEC); } Serial1.print(":");
+  if(now.minute() < 10){ Serial1.print("0"); Serial1.print(now.minute(), DEC);}
+    else{Serial1.print(now.minute(), DEC);} Serial1.print(":");
+  if(now.second() < 10){ Serial1.print("0"); Serial1.print(now.second(), DEC);}
+    else{Serial1.print(now.second(), DEC);} 
 }
 
 void reportTime(){
     DateTime now = rtc.now();
-    if(now.hour() < 10){ data.print("0"); data.print(now.hour(), DEC);} else{data.print(now.hour(), DEC);} data.print(":");
-    if(now.minute() < 10){ data.print("0"); data.print(now.minute(), DEC);} else{data.print(now.minute(), DEC);} data.print(":");
-    if(now.second() < 10){ data.print("0"); data.print(now.second(), DEC);} else{data.print(now.second(), DEC);}
+    if(now.hour() < 10){ data.print("0"); data.print(now.hour(), DEC); Serial.print("0"); Serial.print(now.hour(), DEC);}
+      else{data.print(now.hour(), DEC); Serial.print(now.hour(), DEC);} data.print(":"); Serial.print(":");
+    if(now.minute() < 10){ data.print("0"); data.print(now.minute(), DEC); Serial.print("0"); Serial.print(now.minute(), DEC);}
+      else{data.print(now.minute(), DEC); Serial.print(now.minute(), DEC);} data.print(":"); Serial.print(":");
+    if(now.second() < 10){ data.print("0"); data.print(now.second(), DEC); Serial.print("0"); Serial.print(now.second(), DEC);}
+      else{data.print(now.second(), DEC); Serial.print(now.second(), DEC);}
 }
 
 void report(){
   data = SD.open("analise.txt", FILE_WRITE);
   if(!data){ Serial1.println("***Erro ao abrir documento de texto.***"); Serial.println("***Erro ao abrir documento de texto.***"); Serial.print("\t");}
   else{
-    data.print("\t"); reportTime(); data.print("\t"); data.print(Temperature); data.print("°C"); data.print("\t");
-    data.print(Humidity); data.print("%"); data.print("\t"); 
-    if(S2_M < 100){data.print("0"); data.print(S2_M);} else {data.print(S2_M);} data.print("\t");
-    if(S3_M < 100){data.print("0"); data.print(S3_M);} else {data.print(S3_M);} data.print("\t"); 
-    if(S4_M < 100){data.print("0"); data.print(S4_M);} else {data.print(S4_M);} data.print("\t");
-    if(S5_M < 100){data.print("0"); data.print(S5_M);} else {data.print(S5_M);} data.print("\t");
-    if(S6_M < 100){data.print("0"); data.print(S6_M);} else {data.print(S6_M);} data.print("\t");
-    if(S7_M < 100){data.print("0"); data.print(S7_M);} else {data.print(S7_M);} data.print("\t"); 
-    if(S8_M < 100){data.print("0"); data.print(S8_M);} else {data.print(S8_M);} data.print("\t");
-    if(S9_M < 100){data.print("0"); data.print(S9_M);} else {data.print(S9_M);} data.print("\t");
-    if(S131_M < 100){data.print("0"); data.print(S131_M);} else {data.print(S131_M);} data.print("\t"); 
-    if(S135_M < 100){data.print("0"); data.print(S135_M);} else {data.print(S135_M);} data.println(""); data.close();
+    data.print("\t"); Serial.print("\t"); reportTime(); data.print("\t"); data.print(Temperature); data.print("°C"); data.print("\t");
+    Serial.print("\t"); Serial.print(Temperature); Serial.print("\t");
+    data.print(Humidity); data.print("%"); data.print("\t"); Serial.print(Humidity); Serial.print("\t"); 
+    if(S2_M < 100){data.print("0"); data.print(S2_M); Serial.print("0"); Serial.print(S2_M);}
+      else {data.print(S2_M); Serial.print(S2_M);} data.print("\t"); Serial.print("\t");
+    if(S3_M < 100){data.print("0"); data.print(S3_M); Serial.print("0"); Serial.print(S3_M);}
+      else {data.print(S3_M); Serial.print(S3_M);} data.print("\t"); Serial.print("\t"); 
+    if(S4_M < 100){data.print("0"); data.print(S4_M); Serial.print("0"); Serial.print(S4_M);}
+      else {data.print(S4_M); Serial.print(S4_M);} data.print("\t"); Serial.print("\t");
+    if(S5_M < 100){data.print("0"); data.print(S5_M); Serial.print("0"); Serial.print(S5_M);}
+      else {data.print(S5_M); Serial.print(S5_M);} data.print("\t"); Serial.print("\t");
+    if(S6_M < 100){data.print("0"); data.print(S6_M); Serial.print("0"); Serial.print(S6_M);}
+      else {data.print(S6_M); Serial.print(S6_M);} data.print("\t"); Serial.print("\t");
+    if(S7_M < 100){data.print("0"); data.print(S7_M); Serial.print("0"); Serial.print(S7_M);}
+      else {data.print(S7_M); Serial.print(S7_M);} data.print("\t"); Serial.print("\t"); 
+    if(S8_M < 100){data.print("0"); data.print(S8_M); Serial.print("0"); Serial.print(S8_M);}
+      else {data.print(S8_M); Serial.print(S8_M);} data.print("\t"); Serial.print("\t");
+    if(S9_M < 100){data.print("0"); data.print(S9_M); Serial.print("0"); Serial.print(S9_M);}
+      else {data.print(S9_M); Serial.print(S9_M);} data.print("\t"); Serial.print("\t");
+    if(S131_M < 100){data.print("0"); data.print(S131_M); Serial.print("0"); Serial.print(S131_M);}
+      else {data.print(S131_M); Serial.print(S131_M);} data.print("\t"); Serial.print("\t"); 
+    if(S135_M < 100){data.print("0"); data.print(S135_M); Serial.print("0"); Serial.print(S135_M);}
+      else {data.print(S135_M); Serial.print(S135_M);} data.println(""); Serial.println(""); data.close();
   }
 }
 
