@@ -76,7 +76,7 @@ void report(void);  void pulse(void);
 void setup(){
   //Inicialização
   tempo, tempo1 = millis(); Serial.begin(9600); TempHum.begin(); Serial1.begin(9600); Wire.begin(); rtc.begin();
-  while(!Serial1.available() || !Serial.available()); Serial1.read(); Serial.read(); Serial1.flush(); Serial.flush(); SD.begin(CS); rtc.isrunning(); rtc.adjust(DateTime(__DATE__, __TIME__));
+  while(!Serial1.available()); Serial1.read(); Serial.read(); Serial1.flush(); Serial.flush(); SD.begin(CS); rtc.isrunning(); rtc.adjust(DateTime(__DATE__, __TIME__));
   
   //Verificação dos Módulos
   Serial1.println("Inicializando..."); Serial1.println("");
