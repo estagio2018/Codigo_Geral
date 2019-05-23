@@ -195,7 +195,7 @@ void header(){
 
 void writeOption(){ 
   if(Serial1.available() > 48){
-    Serial1.read(); Serial1.println(""); Serial1.print("Eu: "); Serial1.write(Option); Serial1.println(""); Serial1.println(""); Serial1.flush();
+    Option = Serial1.read(); Serial1.println(""); Serial1.print("Eu: "); Serial1.write(Option); Serial1.println(""); Serial1.println(""); Serial1.flush();
   }      
 }
 
