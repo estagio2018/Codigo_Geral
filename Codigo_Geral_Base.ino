@@ -54,7 +54,7 @@
   #define pulseTime 60000
   int S2, S3, S4, S5, S6, S7, S8, S9, S131, S135 = 0;
   int S2_M, S3_M, S4_M, S5_M, S6_M, S7_M, S8_M, S9_M, S131_M, S135_M;
-  unsigned long tempo, tempo1;
+  unsigned long tempo, tempo1, timedel;
   
 // Configuração do Hc05:
   int Option, option, x;
@@ -66,24 +66,25 @@
 // Configuração do SD Card:
   #define CS 4
   File data;
+  String Arquivo = "analise.txt";
 
 void mean(void);    void checkSensor(void);
 void header(void);  void writeOption(void);
 void reading(void); void getDate(void);
 void getTime(void); void reportTime(void);
-void report(void);  void pulse(void);
+void report(void);  void pulse(void); void delData(void);
 
 void setup(){
   //Inicialização
-  tempo, tempo1 = millis(); Serial.begin(9600); TempHum.begin(); Serial1.begin(9600); Wire.begin(); rtc.begin();
+  tempo, tempo1, timedel = millis(); Serial.begin(9600); TempHum.begin(); Serial1.begin(9600); Wire.begin(); rtc.begin();
   while(!Serial1.available()); Serial1.read(); Serial.read(); Serial1.flush(); Serial.flush(); SD.begin(CS); rtc.isrunning(); rtc.adjust(DateTime(__DATE__, __TIME__));
   
   //Verificação dos Módulos
   Serial1.println("Inicializando..."); Serial1.println("");
   while(!rtc.isrunning()){ Serial1.println("O relógio não está funcionando!"); rtc.adjust(DateTime(__DATE__, __TIME__)); }
   Serial1.print("Procurando Cartão SD... "); delay(1000);
-  while(!SD.begin(CS)){ Serial1.println("Cartão SD não encontrado!!!"); Serial1.println(""); Serial1.println("");}
-  Serial1.write("Cartão SD conectado!!!"); Serial1.println(""); Serial1.println("");
+  if(!SD.begin(CS)){ Serial1.println("Cartão SD não encontrado!!!"); Serial1.println(""); Serial1.println("");}
+  else {Serial1.write("Cartão SD conectado!!!"); Serial1.println(""); Serial1.println("");}
   
   getDate(); getTime(); // Obtem data e hora do RTC.
   checkSensor(); // Checa se os sensores estão ligados.
@@ -91,9 +92,24 @@ void setup(){
 }
 
 void loop(){
-  writeOption(); getTime(); reading(); MQSensor(); report();
+  writeOption(); delData(); getTime(); reading(); MQSensor(); report();
 }
 
+void delData(){
+  if(Option == 9){
+    Serial1.println("Deseja limpar o arquivo de texto? S/n"); while(!Serial1.available()); 
+    Option = Serial1.read(); 
+    switch(Option){
+      case 83: SD.remove(Arquivo);
+               while((SD.exists(Arquivo)) && (millis() - timedel < 2000)){
+                    SD.remove(Arquivo); timedel = millis();} if(SD.exists(Arquivo)) Serial1.println("Falha ao limpar cartão."); break;
+      case 115: SD.remove(Arquivo);
+                while((SD.exists(Arquivo)) && (millis() - timedel < 2000)){
+                     SD.remove(Arquivo); timedel = millis();} if(SD.exists(Arquivo)) Serial1.println("Falha ao limpar cartão."); break;
+    }
+    
+  }
+}
 void mean(){
   S2 = 0; S3 = 0; S4 = 0; S5 = 0; S6 = 0; S7 = 0; S8 = 0; S9 = 0; S131 = 0; S135 = 0;
   for(x=0; x<5; x++){
@@ -151,10 +167,9 @@ void MQSensor(){
 }
 
 void header(){
-  data = SD.open("analise.txt", FILE_WRITE);
+  data = SD.open(Arquivo, FILE_WRITE);
   if(!data){
     Serial1.println("   ***Erro ao abrir documento de texto.***   ");}
-  else{
     data.print("Experimento iniciado no dia ");
     DateTime now = rtc.now();
     if(now.day() < 10){ data.print("0"); Serial.print("0"); data.print(now.day(), DEC); Serial.print(now.day(), DEC);} 
@@ -176,7 +191,6 @@ void header(){
     Serial.print("MQ04"); Serial.print("\t"); Serial.print("MQ05"); Serial.print("\t"); Serial.print("MQ06"); Serial.print("\t"); 
     Serial.print("MQ07"); Serial.print("\t"); Serial.print("MQ08"); Serial.print("\t"); Serial.print("MQ09"); Serial.print("\t");
     Serial.print("MQ131"); Serial.print("\t"); Serial.print("MQ0135"); Serial.print("\t"); Serial.println("");
-  }
 }
 
 void writeOption(){ 
@@ -226,9 +240,8 @@ void reportTime(){
 }
 
 void report(){
-  data = SD.open("analise.txt", FILE_WRITE);
-  if(!data){ Serial1.println("***Erro ao abrir documento de texto.***"); Serial.println("***Erro ao abrir documento de texto.***"); Serial.print("\t");}
-  else{
+  data = SD.open(Arquivo, FILE_WRITE);
+  if(!data){ Serial1.println("***Erro ao abrir documento de texto.***");}
     data.print("\t"); Serial.print("\t"); reportTime(); data.print("\t"); data.print(Temperature); data.print("°C"); data.print("\t");
     Serial.print("\t"); Serial.print(Temperature); Serial.print("\t");
     data.print(Humidity); data.print("%"); data.print("\t"); Serial.print(Humidity); Serial.print("\t"); 
@@ -252,7 +265,6 @@ void report(){
       else {data.print(S131_M); Serial.print(S131_M);} data.print("\t"); Serial.print("\t"); 
     if(S135_M < 100){data.print("0"); data.print(S135_M); Serial.print("0"); Serial.print(S135_M);}
       else {data.print(S135_M); Serial.print(S135_M);} data.println(""); Serial.println(""); data.close();
-  }
 }
 
 void pulse(){
