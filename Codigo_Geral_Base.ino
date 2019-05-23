@@ -96,7 +96,7 @@ void loop(){
 }
 
 void delData(){
-  if(Option == 9){
+  if(Option == 57){
     Serial1.println("Deseja limpar o arquivo de texto? S/n"); while(!Serial1.available()); 
     Option = Serial1.read(); 
     switch(Option){
