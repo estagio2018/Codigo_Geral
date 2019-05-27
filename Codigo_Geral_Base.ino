@@ -20,9 +20,10 @@
       + SDA: pino 20;
       + SCL: pino 21.
     - Módulo SD card: ***COMUNICAÇÃO SPI***
-      + MOSI: pino 50;
-      + MISO: pino 51;
-      + SCK: pino 52.
+      + Os seguintes pinos necessitam de um divisor de tensão (5V~3,3V).
+         MOSI: pino 50;
+         MISO: pino 51; (Exceção)
+         SCK: pino 52.
 */
     
     
