@@ -277,9 +277,3 @@ void pulse(){
   }
 }
 
-
-/*
- * TEXTO ESCRITO NO DOCUMENTO .txt
-    Time   Temperature Humididty   MQ02     MQ03     MQ04     MQ05     MQ06     MQ07     MQ08     MQ09    MQ131    MQ135
-  15:53:34   25.43°C    30.12%     1234     1234     1234     1234     1234     1234     1234     1234    1234     1234 
- */
