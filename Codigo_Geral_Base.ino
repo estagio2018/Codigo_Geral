@@ -5,16 +5,16 @@
     - Módulo Bluetooth Hc-05:
       + Rx necessita de divisor de tensão (5V~3,3V).
     -Sensores de Gás:
-      + MQ02 - Detecção de (...);
-      + MQ03 - Detecção de (...);
-      + MQ04 - Detecção de (...);
-      + MQ05 - Detecção de (...);
-      + MQ06 - Detecção de (...);
-      + MQ07 - Detecção de (...);
-      + MQ08 - Detecção de (...);
-      + MQ09 - Detecção de (...);
-      + MQ131 - Detecção de (...);
-      + MQ135 - Detecção de (...);
+      + MQ02 - Detecção de Metano, Butano, GPL e Fumaça;
+      + MQ03 - Detecção de Álcool, Etanol e Fumaça;
+      + MQ04 - Detecção de Metano;
+      + MQ05 - Detecção de H2, GLP, CH4, CO, Álcool e Gás Natural;
+      + MQ06 - Detecção de GPL, Isobutano, Butano e Propano;
+      + MQ07 - Detecção de Monóxido de Carbono;
+      + MQ08 - Detecção de H2;
+      + MQ09 - Detecção de CH4 e GPL;
+      + MQ131 - Detecção de Ozônio;
+      + MQ135 - Detecção de Benzeno, Álcool, Fumaça, Propano, Formaldeído e Hidrogênio, Amônia;
     -Sensor de Temperatura e Umidade DHT22.
     -Tiny RTC: ***COMUNICAÇÃO I2C***
       + SDA: pino 20;
