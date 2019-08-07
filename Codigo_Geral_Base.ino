@@ -1,9 +1,10 @@
-/*2019-03-12 - IFG-Câmpus Goiânia - Codigo_Geral_Base
-  Editor: Victor Gabriel P. Santos
-  **Código Base Geral para o projeto do Nariz eletrônico.
+/*2019/03/12 - IFG-Câmpus Goiânia - Codigo_Geral_Base
+  Criador: Victor Gabriel P. Santos
+  **Código Base para o projeto do Nariz eletrônico.
   **Fixa Técnica:
     - Módulo Bluetooth Hc-05:
       + Rx necessita de divisor de tensão (5V~3,3V).
+      
     -Sensores de Gás:
       + MQ02 - Detecção de Metano, Butano, GPL e Fumaça;
       + MQ03 - Detecção de Álcool, Etanol e Fumaça;
@@ -14,18 +15,20 @@
       + MQ08 - Detecção de H2;
       + MQ09 - Detecção de CH4 e GPL;
       + MQ131 - Detecção de Ozônio;
-      + MQ135 - Detecção de Benzeno, Álcool, Fumaça, Propano, Formaldeído e Hidrogênio, Amônia;
+      + MQ135 - Detecção de Benzeno, Álcool, Fumaça, Propano, Formaldeído e Hidrogênio, Amônia.
+      
     -Sensor de Temperatura e Umidade DHT22.
+    
     -Tiny RTC: ***COMUNICAÇÃO I2C***
       + SDA: pino 20;
       + SCL: pino 21.
+      
     - Módulo SD card: ***COMUNICAÇÃO SPI***
       + Os seguintes pinos necessitam de um divisor de tensão (5V~3,3V).
          MOSI: pino 50;
          MISO: pino 51; (Exceção)
          SCK: pino 52.
 */
-    
     
 //Bibliotecas:
   #include <DHT.h>
@@ -35,31 +38,30 @@
   #include <SD.h>
 
 // Configuração do DHT:
-  #define DHT_Pin A0
+  #define DHT_Pin A11
   #define DHT_Type DHT22
   DHT TempHum(DHT_Pin, DHT_Type);
-  float Humidity, Temperature, Temp_M, Hum_M;
-  
+  float Humidity, Temperature;
+
 // Configuração dos sensores de gás:
-  #define MQ_02 A1
-  #define MQ_03 A2
-  #define MQ_04 A3
-  #define MQ_05 A4
-  #define MQ_06 A5
-  #define MQ_07 A6
-  #define MQ_08 A7
-  #define MQ_09 A8
-  #define MQ_131 A9
-  #define MQ_135 A10
-  #define MQ_pin 9
+  #define MQ02 A2
+  #define MQ03 A1
+  #define MQ04 A0
+  #define MQ05 A3
+  #define MQ06 A4
+  #define MQ07 A10
+  #define MQ08 A5
+  #define MQ09 A9
+  #define MQ131 A6
+  #define MQ135 A8
+  #define MQX A7
+  #define pulsePin 58
   #define pulseTime 60000
-  int S2, S3, S4, S5, S6, S7, S8, S9, S131, S135 = 0;
-  int S2_M, S3_M, S4_M, S5_M, S6_M, S7_M, S8_M, S9_M, S131_M, S135_M;
+  int S[11] = {0};
   unsigned long tempo, tempo1, timedel;
   
 // Configuração do Hc05:
-  int Option, option, x;
-  int Time = 1000;  
+  int Option, x, i = 5, Time = 1000;  
 
 // Configuração do RTC:
   RTC_DS1307 rtc;
@@ -69,23 +71,28 @@
   File data;
   String Arquivo = "analise.txt";
 
+// Variaveis Globais
+  byte lock = 1;
+
 void mean(void);    void checkSensor(void);
 void header(void);  void writeOption(void);
 void reading(void); void getDate(void);
 void getTime(void); void reportTime(void);
-void report(void);  void pulse(void); void delData(void);
+void report(void);  void pulse(void); 
+void delData(void); void connection(void);
 
 void setup(){
   //Inicialização
-  tempo, tempo1, timedel = millis(); Serial.begin(9600); TempHum.begin(); Serial1.begin(9600); Wire.begin(); rtc.begin();
-  while(!Serial1.available()); Serial1.read(); Serial.read(); Serial1.flush(); Serial.flush(); SD.begin(CS); rtc.isrunning(); rtc.adjust(DateTime(__DATE__, __TIME__));
+    tempo = millis(); tempo1 = millis(); timedel = millis();
+    Serial.begin(9600); Serial1.begin(9600); 
+    TempHum.begin(); Wire.begin(); SD.begin(CS); 
+    while(!Serial1.available()); 
+    Serial1.read(); Serial1.flush(); 
+    rtc.begin(); rtc.isrunning(); rtc.adjust(DateTime(__DATE__, __TIME__));
   
   //Verificação dos Módulos
-  Serial1.println("Inicializando..."); Serial1.println("");
-  while(!rtc.isrunning()){ Serial1.println("O relógio não está funcionando!"); rtc.adjust(DateTime(__DATE__, __TIME__)); }
-  Serial1.print("Procurando Cartão SD... "); delay(1000);
-  if(!SD.begin(CS)){ Serial1.println("Cartão SD não encontrado!!!"); Serial1.println(""); Serial1.println("");}
-  else {Serial1.write("Cartão SD conectado!!!"); Serial1.println(""); Serial1.println("");}
+    Serial1.println("Inicializando...");
+    connection();
   
   getDate(); getTime(); // Obtem data e hora do RTC.
   checkSensor(); // Checa se os sensores estão ligados.
@@ -93,111 +100,140 @@ void setup(){
 }
 
 void loop(){
-  writeOption(); delData(); getTime(); reading(); MQSensor(); report();
+  writeOption(); delData(); connection(); 
+  getTime(); reading(); MQSensor(); report();
+}
+
+void connection(){
+  if(!rtc.isrunning()){
+    rtc.adjust(DateTime(__DATE__, __TIME__));
+    if(lock){Serial1.println("O relógio não está ativo!");}
+  }
+  if(!SD.begin(CS)){ 
+    if(lock){
+      Serial1.println("Cartão SD não encontrado!!!"); Serial1.println("");
+    }
+  }
+  if(rtc.isrunning() && SD.begin(CS)){
+    if(lock){
+      Serial1.println("Cartão SD conectado!!!"); Serial1.println("");
+    }
+    lock = 0; return;
+  }
+  lock = 1;
 }
 
 void delData(){
   if(Option == 57){
-    Serial1.println("Deseja limpar o arquivo de texto? S/n"); while(!Serial1.available()); 
-    Option = Serial1.read(); 
+    Serial1.println("Deseja limpar o arquivo de texto? S/n"); 
+    while(!Serial1.available()); Option = Serial1.read(); 
     switch(Option){
       case 83: SD.remove(Arquivo);
                while((SD.exists(Arquivo)) && (millis() - timedel < 2000)){
-                    SD.remove(Arquivo); timedel = millis();} if(SD.exists(Arquivo)) Serial1.println("Falha ao limpar cartão."); break;
+                    SD.remove(Arquivo); timedel = millis();
+               }
+               if(SD.exists(Arquivo)) Serial1.println("Falha ao limpar cartão."); break;
       case 115: SD.remove(Arquivo);
                 while((SD.exists(Arquivo)) && (millis() - timedel < 2000)){
-                     SD.remove(Arquivo); timedel = millis();} if(SD.exists(Arquivo)) Serial1.println("Falha ao limpar cartão."); break;
+                     SD.remove(Arquivo); timedel = millis();
+                }
+                if(SD.exists(Arquivo)) Serial1.println("Falha ao limpar cartão."); break;
+      default: Option = 48; break;
     }
-    
   }
 }
+
 void mean(){
-  S2 = 0; S3 = 0; S4 = 0; S5 = 0; S6 = 0; S7 = 0; S8 = 0; S9 = 0; S131 = 0; S135 = 0;
-  for(x=0; x<5; x++){
-      S2 += analogRead(MQ_02); S3 += analogRead(MQ_03); S4 += analogRead(MQ_04); S5 += analogRead(MQ_05); S6 += analogRead(MQ_06);
-      S8 += analogRead(MQ_08); S131 += analogRead(MQ_131); S135 += analogRead(MQ_135);
-      if (digitalRead(MQ_pin) == HIGH){analogReference(INTERNAL1V1); S7 += analogRead(MQ_07); S9 += analogRead(MQ_09); analogReference(DEFAULT);}
-        else{analogReference(DEFAULT); S7 += analogRead(MQ_07); S9 += analogRead(MQ_09);}
-      Humidity = TempHum.readHumidity(); Temperature = TempHum.readTemperature(); delay(Time/5);
+  for(x=0; x<i; x++){
+      S[0] += analogRead(MQ02); S[1] += analogRead(MQ03); S[2] += analogRead(MQ04); S[3] += analogRead(MQ05); 
+      S[4] += analogRead(MQ06); S[6] += analogRead(MQ08); S[8] += analogRead(MQ131); S[9] += analogRead(MQ135);
+      if(digitalRead(pulsePin) == HIGH){
+        analogReference(INTERNAL1V1); S[5] += analogRead(MQ07); S[7] += analogRead(MQ09); analogReference(DEFAULT);
+      }
+      else {
+        analogReference(DEFAULT); S[5] += analogRead(MQ07); S[7] += analogRead(MQ09);
+      }
+      delay(Time/i);
     }
-    S2_M = int(S2/x); S3_M = int(S3/x); S4_M = int(S4/x); S5_M = int(S5/x); S6_M = int(S6/x);
-    S7_M = int(S7/x); S8_M = int(S8/x); S9_M = int(S9/x); S131_M = int(S131/x); S135_M = int(S135/x);
-    Hum_M = Humidity/x; Temp_M = Temperature/x;
-    
+    S[0] = int(S[0]/x); S[1] = int(S[1]/x); S[2] = int(S[2]/x); S[3] = int(S[3]/x); S[4] = int(S[4]/x);
+    S[5] = int(S[5]/x); S[6] = int(S[6]/x); S[7] = int(S[7]/x); S[8] = int(S[8]/x); S[9] = int(S[9]/x);
 }
 
 void checkSensor(){
   mean();
   Serial1.println(""); Serial.println("");
   Serial1.println("Checagem de Sensores:"); Serial1.println("Checagem de Sensores:");
-  if(S2_M != 0) {Serial1.println(F("   Sensor MQ02:   OK!")); Serial.print(F("Sensor MQ02:")); Serial.print("\t"); Serial.println("OK!");}
+  if(S[0] != 0) {Serial1.println(F("   Sensor MQ02:   OK!")); Serial.print(F("Sensor MQ02:")); Serial.print("\t"); Serial.println("OK!");}
       else {Serial1.println(F("   Sensor MQ02:   Não Conectado!")); Serial.print(F("Sensor MQ02:")); Serial.print("\t"); Serial.println("Não Conectado!");}
-  if(S3_M != 0) {Serial1.println(F("   Sensor MQ03:   OK!")); Serial.print(F("Sensor MQ03:")); Serial.print("\t"); Serial.println("OK!");}
+  if(S[1] != 0) {Serial1.println(F("   Sensor MQ03:   OK!")); Serial.print(F("Sensor MQ03:")); Serial.print("\t"); Serial.println("OK!");}
       else {Serial1.println(F("   Sensor MQ03:   Não Conectado!")); Serial.print(F("Sensor MQ03:")); Serial.print("\t"); Serial.println("Não Conectado!");}
-  if(S4_M != 0) {Serial1.println(F("   Sensor MQ04:   OK!")); Serial.print(F("Sensor MQ04:")); Serial.print("\t"); Serial.println("OK!");}
+  if(S[2] != 0) {Serial1.println(F("   Sensor MQ04:   OK!")); Serial.print(F("Sensor MQ04:")); Serial.print("\t"); Serial.println("OK!");}
       else {Serial1.println(F("   Sensor MQ04:   Não Conectado!")); Serial.print(F("Sensor MQ04:")); Serial.print("\t"); Serial.println("Não Conectado!");}
-  if(S5_M != 0) {Serial1.println(F("   Sensor MQ05:   OK!")); Serial.print(F("Sensor MQ05:")); Serial.print("\t"); Serial.println("OK!");}
+  if(S[3] != 0) {Serial1.println(F("   Sensor MQ05:   OK!")); Serial.print(F("Sensor MQ05:")); Serial.print("\t"); Serial.println("OK!");}
       else {Serial1.println(F("   Sensor MQ05:   Não Conectado!")); Serial.print(F("Sensor MQ05:")); Serial.print("\t"); Serial.println("Não Conectado!");}
-  if(S6_M != 0) {Serial1.println(F("   Sensor MQ06:   OK!")); Serial.print(F("Sensor MQ06:")); Serial.print("\t"); Serial.println("OK!");} 
+  if(S[4] != 0) {Serial1.println(F("   Sensor MQ06:   OK!")); Serial.print(F("Sensor MQ06:")); Serial.print("\t"); Serial.println("OK!");} 
       else {Serial1.println(F("   Sensor MQ06:   Não Conectado!")); Serial.print(F("Sensor MQ06:")); Serial.print("\t"); Serial.println("Não Conectado!");}
-  if(S7_M != 0) {Serial1.println(F("   Sensor MQ07:   OK!")); Serial.print(F("Sensor MQ07:")); Serial.print("\t"); Serial.println("OK!");} 
+  if(S[5] != 0) {Serial1.println(F("   Sensor MQ07:   OK!")); Serial.print(F("Sensor MQ07:")); Serial.print("\t"); Serial.println("OK!");} 
       else {Serial1.println(F("   Sensor MQ07:   Não Conectado!")); Serial.print(F("Sensor MQ07:")); Serial.print("\t"); Serial.println("Não Conectado!");}
-  if(S8_M != 0) {Serial1.println(F("   Sensor MQ08:   OK!")); Serial.print(F("Sensor MQ08:")); Serial.print("\t"); Serial.println("OK!");}
+  if(S[6] != 0) {Serial1.println(F("   Sensor MQ08:   OK!")); Serial.print(F("Sensor MQ08:")); Serial.print("\t"); Serial.println("OK!");}
       else {Serial1.println(F("   Sensor MQ08:   Não Conectado!")); Serial.print(F("Sensor MQ08:")); Serial.print("\t"); Serial.println("Não Conectado!");}
-  if(S9_M != 0) {Serial1.println(F("   Sensor MQ09:   OK!")); Serial.print(F("Sensor MQ09:")); Serial.print("\t"); Serial.println("OK!");}
+  if(S[7] != 0) {Serial1.println(F("   Sensor MQ09:   OK!")); Serial.print(F("Sensor MQ09:")); Serial.print("\t"); Serial.println("OK!");}
       else {Serial1.println(F("   Sensor MQ09:   Não Conectado!")); Serial.print(F("Sensor MQ09:")); Serial.print("\t"); Serial.println("Não Conectado!");}
-  if(S131_M != 0) {Serial1.println(F("   Sensor MQ131: OK!")); Serial.print(F("Sensor MQ131:")); Serial.print("\t"); Serial.println("OK!");}
+  if(S[8] != 0) {Serial1.println(F("   Sensor MQ131: OK!")); Serial.print(F("Sensor MQ131:")); Serial.print("\t"); Serial.println("OK!");}
       else {Serial1.println(F("   Sensor MQ131: Não Conectado!")); Serial.print(F("Sensor MQ131:")); Serial.print("\t"); Serial.println("Não Conectado!");}
-  if(S135_M != 0) {Serial1.println(F("   Sensor MQ135: OK!")); Serial.print(F("Sensor MQ135:")); Serial.print("\t"); Serial.println("OK!");}
+  if(S[9] != 0) {Serial1.println(F("   Sensor MQ135: OK!")); Serial.print(F("Sensor MQ135:")); Serial.print("\t"); Serial.println("OK!");}
       else {Serial1.println(F("   Sensor MQ135: Não Conectado!")); Serial.print(F("Sensor MQ135:")); Serial.print("\t"); Serial.println("Não Conectado!");}
   Serial1.println(""); Serial1.println(""); Serial.println(""); Serial.println(""); 
 }
 
 void MQSensor(){
   mean();
-  Serial1.print(F("Sensor MQ02:  ")); Serial1.print(S2_M); Serial1.print("   ");
-  Serial1.print(F("Sensor MQ03:  ")); Serial1.print(S3_M); Serial1.println("   ");
-  Serial1.print(F("Sensor MQ04:  ")); Serial1.print(S4_M); Serial1.print("   ");
-  Serial1.print(F("Sensor MQ05:  ")); Serial1.print(S5_M); Serial1.println("   ");
-  Serial1.print(F("Sensor MQ06:  ")); Serial1.print(S6_M); Serial1.print("   ");
-  Serial1.print(F("Sensor MQ07:  ")); Serial1.print(S7_M); Serial1.println("   ");
-  Serial1.print(F("Sensor MQ08:  ")); Serial1.print(S8_M); Serial1.print("   ");
-  Serial1.print(F("Sensor MQ09:  ")); Serial1.print(S9_M); Serial1.println("   ");
-  Serial1.print(F("Sensor MQ131: ")); Serial1.print(S131_M); Serial1.print("   ");
-  Serial1.print(F("Sensor MQ135: ")); Serial1.print(S135_M); Serial1.println("   "); Serial1.println("");
+  Serial1.print("Sensor MQ02:  "); Serial1.print(S[0]); Serial1.print("   ");
+  Serial1.print("Sensor MQ03:  "); Serial1.print(S[1]); Serial1.println("   ");
+  Serial1.print("Sensor MQ04:  "); Serial1.print(S[2]); Serial1.print("   ");
+  Serial1.print("Sensor MQ05:  "); Serial1.print(S[3]); Serial1.println("   ");
+  Serial1.print("Sensor MQ06:  "); Serial1.print(S[4]); Serial1.print("   ");
+  Serial1.print("Sensor MQ07:  "); Serial1.print(S[5]); Serial1.println("   ");
+  Serial1.print("Sensor MQ08:  "); Serial1.print(S[6]); Serial1.print("   ");
+  Serial1.print("Sensor MQ09:  "); Serial1.print(S[7]); Serial1.println("   ");
+  Serial1.print("Sensor MQ131: "); Serial1.print(S[8]); Serial1.print("   ");
+  Serial1.print("Sensor MQ135: "); Serial1.print(S[9]); Serial1.println("   "); Serial1.println("");
 }
 
 void header(){
-  data = SD.open(Arquivo, FILE_WRITE);
-  if(!data){
-    Serial1.println("   ***Erro ao abrir documento de texto.***   ");}
-    data.print("Experimento iniciado no dia ");
-    DateTime now = rtc.now();
-    if(now.day() < 10){ data.print("0"); Serial.print("0"); data.print(now.day(), DEC); Serial.print(now.day(), DEC);} 
-      else {data.print(now.day(), DEC); Serial.print(now.day(), DEC);} data.print("/"); Serial.print("/");
-    if(now.month() < 10){ data.print("0"); Serial.print("0"); data.print(now.month(), DEC); Serial.print(now.month(), DEC);}
-      else {data.print(now.month(), DEC); Serial.print(now.month(), DEC);} data.print("/"); Serial.print("/");
-    if(now.year() < 10){ data.print("0"); data.print(now.year(), DEC); Serial.print("0"); Serial.print(now.year(), DEC);}
-      else {data.print(now.year(), DEC); Serial.print(now.year(), DEC);} data.print(" às "); Serial.print(" às ");
-    reportTime(); data.print("."); data.println(""); data.println(""); data.print("    Dados em média dos sensores:"); data.println(""); 
-    data.print("\t"); data.print("Horas"); data.print("\t"); data.print("Temp."); data.print("\t");
-    data.print("Umid."); data.print("\t"); data.print("MQ02"); data.print("\t"); data.print("MQ03"); data.print("\t"); 
-    data.print("MQ04"); data.print("\t"); data.print("MQ05"); data.print("\t"); data.print("MQ06"); data.print("\t"); 
-    data.print("MQ07"); data.print("\t"); data.print("MQ08"); data.print("\t"); data.print("MQ09"); data.print("\t");
-    data.print("MQ131"); data.print("\t"); data.print("MQ0135"); data.print("\t"); data.println(""); data.close();
-
-    Serial.print("."); Serial.println(""); Serial.println(""); Serial.print("Dados em média dos sensores:"); Serial.println(""); 
-    Serial.print("\t"); Serial.print("Horas"); Serial.print("\t"); Serial.print("Temp."); Serial.print("\t");
-    Serial.print("Umid."); Serial.print("\t"); Serial.print("MQ02"); Serial.print("\t"); Serial.print("MQ03"); Serial.print("\t"); 
-    Serial.print("MQ04"); Serial.print("\t"); Serial.print("MQ05"); Serial.print("\t"); Serial.print("MQ06"); Serial.print("\t"); 
-    Serial.print("MQ07"); Serial.print("\t"); Serial.print("MQ08"); Serial.print("\t"); Serial.print("MQ09"); Serial.print("\t");
-    Serial.print("MQ131"); Serial.print("\t"); Serial.print("MQ0135"); Serial.print("\t"); Serial.println("");
+  //Relatório no Cartão SD
+    data = SD.open(Arquivo, FILE_WRITE);
+    if(!data){
+      Serial1.println("   ***Erro ao abrir documento de texto.***   ");}
+      data.print("Experimento iniciado no dia ");
+      DateTime now = rtc.now();
+      if(now.day() < 10){ data.print("0"); Serial.print("0"); data.print(now.day(), DEC); Serial.print(now.day(), DEC);} 
+        else {data.print(now.day(), DEC); Serial.print(now.day(), DEC);} data.print("/"); Serial.print("/");
+      if(now.month() < 10){ data.print("0"); Serial.print("0"); data.print(now.month(), DEC); Serial.print(now.month(), DEC);}
+        else {data.print(now.month(), DEC); Serial.print(now.month(), DEC);} data.print("/"); Serial.print("/");
+      if(now.year() < 10){ data.print("0"); data.print(now.year(), DEC); Serial.print("0"); Serial.print(now.year(), DEC);}
+        else {data.print(now.year(), DEC); Serial.print(now.year(), DEC);} data.print(" às "); Serial.print(" às ");
+      reportTime(); data.print("."); data.println(""); data.println(""); data.print("    Dados em média dos sensores:"); data.println(""); 
+      data.print("\t"); data.print("Horas"); data.print("\t"); data.print("Temp."); data.print("\t");
+      data.print("Umid."); data.print("\t"); data.print("MQ02"); data.print("\t"); data.print("MQ03"); data.print("\t"); 
+      data.print("MQ04"); data.print("\t"); data.print("MQ05"); data.print("\t"); data.print("MQ06"); data.print("\t"); 
+      data.print("MQ07"); data.print("\t"); data.print("MQ08"); data.print("\t"); data.print("MQ09"); data.print("\t");
+      data.print("MQ131"); data.print("\t"); data.print("MQ0135"); data.print("\t"); data.println(""); data.close();
+      
+  //Relatório no monitor Serial
+      Serial.print("."); Serial.println(""); Serial.println(""); Serial.print("Dados em média dos sensores:"); Serial.println(""); 
+      Serial.print("\t"); Serial.print("Horas"); Serial.print("\t"); Serial.print("Temp."); Serial.print("\t");
+      Serial.print("Umid."); Serial.print("\t"); Serial.print("MQ02"); Serial.print("\t"); Serial.print("MQ03"); Serial.print("\t"); 
+      Serial.print("MQ04"); Serial.print("\t"); Serial.print("MQ05"); Serial.print("\t"); Serial.print("MQ06"); Serial.print("\t"); 
+      Serial.print("MQ07"); Serial.print("\t"); Serial.print("MQ08"); Serial.print("\t"); Serial.print("MQ09"); Serial.print("\t");
+      Serial.print("MQ131"); Serial.print("\t"); Serial.print("MQ0135"); Serial.print("\t"); Serial.println("");
 }
 
 void writeOption(){ 
   Serial1.available();
   if(Serial1.read() > 48){
-    Option = Serial1.read(); Serial1.println(""); Serial1.print("Eu: "); Serial1.write(Option); Serial1.println(""); Serial1.println(""); Serial1.flush();
+    Option = Serial1.read(); Serial1.println(""); Serial1.print("Eu: ");
+    Serial1.write(Option); Serial1.println(""); Serial1.println(""); Serial1.flush();
   }      
 }
 
@@ -247,34 +283,34 @@ void report(){
     data.print("\t"); Serial.print("\t"); reportTime(); data.print("\t"); data.print(Temperature); data.print("°C"); data.print("\t");
     Serial.print("\t"); Serial.print(Temperature); Serial.print("\t");
     data.print(Humidity); data.print("%"); data.print("\t"); Serial.print(Humidity); Serial.print("\t"); 
-    if(S2_M < 100){data.print("0"); data.print(S2_M); Serial.print("0"); Serial.print(S2_M);}
-      else {data.print(S2_M); Serial.print(S2_M);} data.print("\t"); Serial.print("\t");
-    if(S3_M < 100){data.print("0"); data.print(S3_M); Serial.print("0"); Serial.print(S3_M);}
-      else {data.print(S3_M); Serial.print(S3_M);} data.print("\t"); Serial.print("\t"); 
-    if(S4_M < 100){data.print("0"); data.print(S4_M); Serial.print("0"); Serial.print(S4_M);}
-      else {data.print(S4_M); Serial.print(S4_M);} data.print("\t"); Serial.print("\t");
-    if(S5_M < 100){data.print("0"); data.print(S5_M); Serial.print("0"); Serial.print(S5_M);}
-      else {data.print(S5_M); Serial.print(S5_M);} data.print("\t"); Serial.print("\t");
-    if(S6_M < 100){data.print("0"); data.print(S6_M); Serial.print("0"); Serial.print(S6_M);}
-      else {data.print(S6_M); Serial.print(S6_M);} data.print("\t"); Serial.print("\t");
-    if(S7_M < 100){data.print("0"); data.print(S7_M); Serial.print("0"); Serial.print(S7_M);}
-      else {data.print(S7_M); Serial.print(S7_M);} data.print("\t"); Serial.print("\t"); 
-    if(S8_M < 100){data.print("0"); data.print(S8_M); Serial.print("0"); Serial.print(S8_M);}
-      else {data.print(S8_M); Serial.print(S8_M);} data.print("\t"); Serial.print("\t");
-    if(S9_M < 100){data.print("0"); data.print(S9_M); Serial.print("0"); Serial.print(S9_M);}
-      else {data.print(S9_M); Serial.print(S9_M);} data.print("\t"); Serial.print("\t");
-    if(S131_M < 100){data.print("0"); data.print(S131_M); Serial.print("0"); Serial.print(S131_M);}
-      else {data.print(S131_M); Serial.print(S131_M);} data.print("\t"); Serial.print("\t"); 
-    if(S135_M < 100){data.print("0"); data.print(S135_M); Serial.print("0"); Serial.print(S135_M);}
-      else {data.print(S135_M); Serial.print(S135_M);} data.println(""); Serial.println(""); data.close();
+    if(S[0] < 100){data.print("0"); data.print(S[0]); Serial.print("0"); Serial.print(S[0]);}
+      else {data.print(S[0]); Serial.print(S[0]);} data.print("\t"); Serial.print("\t");
+    if(S[1] < 100){data.print("0"); data.print(S[1]); Serial.print("0"); Serial.print(S[1]);}
+      else {data.print(S[1]); Serial.print(S[1]);} data.print("\t"); Serial.print("\t"); 
+    if(S[2] < 100){data.print("0"); data.print(S[2]); Serial.print("0"); Serial.print(S[2]);}
+      else {data.print(S[2]); Serial.print(S[2]);} data.print("\t"); Serial.print("\t");
+    if(S[3] < 100){data.print("0"); data.print(S[3]); Serial.print("0"); Serial.print(S[3]);}
+      else {data.print(S[3]); Serial.print(S[3]);} data.print("\t"); Serial.print("\t");
+    if(S[4] < 100){data.print("0"); data.print(S[4]); Serial.print("0"); Serial.print(S[4]);}
+      else {data.print(S[4]); Serial.print(S[4]);} data.print("\t"); Serial.print("\t");
+    if(S[5] < 100){data.print("0"); data.print(S[5]); Serial.print("0"); Serial.print(S[5]);}
+      else {data.print(S[5]); Serial.print(S[5]);} data.print("\t"); Serial.print("\t"); 
+    if(S[6] < 100){data.print("0"); data.print(S[6]); Serial.print("0"); Serial.print(S[6]);}
+      else {data.print(S[6]); Serial.print(S[6]);} data.print("\t"); Serial.print("\t");
+    if(S[7] < 100){data.print("0"); data.print(S[7]); Serial.print("0"); Serial.print(S[7]);}
+      else {data.print(S[7]); Serial.print(S[7]);} data.print("\t"); Serial.print("\t");
+    if(S[8] < 100){data.print("0"); data.print(S[8]); Serial.print("0"); Serial.print(S[8]);}
+      else {data.print(S[8]); Serial.print(S[8]);} data.print("\t"); Serial.print("\t"); 
+    if(S[9] < 100){data.print("0"); data.print(S[9]); Serial.print("0"); Serial.print(S[9]);}
+      else {data.print(S[9]); Serial.print(S[9]);} data.println(""); Serial.println(""); 
+    data.close();
 }
 
 void pulse(){
-  if((millis() - tempo) > pulseTime && digitalRead(MQ_pin) == HIGH){
-    digitalWrite(MQ_pin, LOW); tempo = millis();
+  if((millis() - tempo) > pulseTime && digitalRead(pulsePin) == HIGH){
+    digitalWrite(pulsePin, LOW); tempo = millis();
   }
-  if((millis() - tempo) > (pulseTime + (pulseTime/3)) && digitalRead(MQ_pin) == LOW){
-    digitalWrite(MQ_pin, HIGH); tempo = millis();
+  if((millis() - tempo) > (pulseTime + (pulseTime/3)) && digitalRead(pulsePin) == LOW){
+    digitalWrite(pulsePin, HIGH); tempo = millis();
   }
 }
-
